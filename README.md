@@ -38,8 +38,17 @@ No cartão de cada cliente cadastrado: escolha o ambiente (Cozinha, Dormitório,
 1600 px e guardadas no navegador do aparelho, agrupadas por ambiente; toque numa foto para ver em tela cheia
 (setas ou deslize para passar, "Apagar foto" para remover).
 
-Para fotos que aparecem para todo mundo no site, coloque os arquivos na pasta `fotos/` e liste no cliente
-em `dados.js`: `fotos: [{ src: 'fotos/maria-cozinha-1.jpg', ambiente: 'Cozinha' }]`.
+### Fotos e clientes fixos (aparecem para todo mundo)
+
+1. **Clientes:** edite `clientes.csv` no GitHub (ou suba a planilha baixada pelo botão "Baixar planilha"
+   com esse nome). Colunas: nome, endereco, bairro, ambiente, instalacao (AAAA-MM), observacoes, latitude, longitude.
+   Sem latitude/longitude, o endereço é localizado automaticamente. A coluna telefone é removida, porque o site é público.
+2. **Fotos:** em `fotos/`, crie uma pasta com o nome do cliente e suba as fotos com o nome do ambiente
+   (`fotos/Maria Souza/Cozinha 1.jpg`). Veja `fotos/LEIA-ME.md`.
+3. A cada envio, o GitHub Actions (`.github/workflows/publicar.yml`) reduz as fotos, gera `fotos.json`,
+   completa `clientes.csv` e publica o site.
+
+O GitHub Pages precisa estar em **Settings → Pages → Source: GitHub Actions**.
 
 "Mostrar clientes simulados" liga e desliga os 527 clientes de exemplo (`TOTAL_SIMULADOS` em `dados.js`).
 

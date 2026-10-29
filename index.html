@@ -384,9 +384,31 @@ mapa.on('load', () => {
   mapa.on('mouseenter', 'pinos', () => { if (!modoAdicionar) mapa.getCanvas().style.cursor = 'pointer'; });
   mapa.on('mouseleave', 'pinos', () => { if (!modoAdicionar) mapa.getCanvas().style.cursor = ''; });
 
-  iniciarAbertura();
-  requestAnimationFrame(quadro);
+  carregarDoSite().finally(() => { renderizar(); iniciarAbertura(); requestAnimationFrame(quadro); });
 });
+
+// ---------- Clientes e fotos fixos do site (clientes.csv e fotos.json no repositório) ----------
+let FOTOS_SITE = {};
+async function carregarDoSite() {
+  const [csv, fotos] = await Promise.all([
+    fetch('clientes.csv', { cache: 'no-cache' }).then(r => (r.ok ? r.text() : '')).catch(() => ''),
+    fetch('fotos.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : {})).catch(() => ({}))
+  ]);
+  FOTOS_SITE = fotos || {};
+  const [cab, ...linhas] = lerCSV(csv.replace(/^\ufeff/, ''));
+  if (!cab) return;
+  const col = nome => cab.findIndex(c => normalizar(c).startsWith(nome));
+  const i = { nome: col('nome'), end: col('ender'), bairro: col('bairro'), amb: col('ambiente'), inst: col('instal'),
+    obs: col('obs'), lat: col('lat'), lng: col('lon') };
+  linhas.forEach((l, n) => {
+    const v = k => (i[k] < 0 ? '' : (l[i[k]] || '').trim());
+    const lat = parseFloat(v('lat').replace(',', '.')), lng = parseFloat(v('lng').replace(',', '.'));
+    const coord = isFinite(lat) && isFinite(lng) ? [lng, lat] : centroBairro(v('bairro'));
+    if (!v('nome') || !coord) return;
+    PONTOS.push({ id: 'site-' + n, fixo: true, nome: v('nome'), endereco: v('end'), bairro: v('bairro'), tipo: tipoDe(v('amb')),
+      data: /^\d{4}-\d{2}$/.test(v('inst')) ? v('inst') : '', obs: v('obs'), coord });
+  });
+}
 
 // ---------- Abertura: pinos pipocando e contador subindo ----------
 const aNum = document.getElementById('aNum'), caixaAbertura = document.getElementById('abertura');
@@ -808,7 +830,7 @@ async function reduzir(arquivo, max = 1600) {
 }
 
 let urlsFotos = [], fotosAbertas = [];
-const chaveFotos = p => (p.local ? 'local-' + p.id : 'fixo-' + p.coord.join());
+const chaveFotos = p => (p.local ? 'local-' + p.id : 'fixo-' + normalizar(p.nome));
 async function mostrarFotos(p) {
   const galeria = $('cGaleria'), alvo = p;
   urlsFotos.forEach(u => URL.revokeObjectURL(u));
@@ -818,7 +840,7 @@ async function mostrarFotos(p) {
   $('cFotosDica').textContent = p.simulado ? 'Cliente simulado: cadastre um cliente real para adicionar fotos.' : '';
   $('cAmbiente').value = AMBIENTES.includes(TIPOS[p.tipo].nome) ? TIPOS[p.tipo].nome : 'Outro';
   // fotos fixas do site (dados.js) + fotos adicionadas neste aparelho
-  let lista = (p.fotos || []).map((f, i) => ({ id: 'site' + i, ambiente: f.ambiente || TIPOS[p.tipo].nome, src: f.src, fixa: true }));
+  let lista = [...(p.fotos || []), ...(FOTOS_SITE[normalizar(p.nome)] || [])].map((f, i) => ({ id: 'site' + i, ambiente: f.ambiente || TIPOS[p.tipo].nome, src: encodeURI(f.src), fixa: true }));
   try { lista = lista.concat((await fotosDoCliente(chaveFotos(p))).sort((a, b) => a.criado - b.criado)); } catch {}
   if (selecionado !== alvo) return;
   lista.forEach(f => { if (f.blob) { f.src = URL.createObjectURL(f.blob); urlsFotos.push(f.src); } });
