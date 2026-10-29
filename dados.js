@@ -70,6 +70,6 @@ const TOTAL_SIMULADOS = 527;
     const num = String(PONTOS.length).padStart(3, '0');
     PONTOS.push({ nome: `Cliente ${num} · ${TIPOS[tipo].nome}`, bairro: b[0], tipo,
       coord: [+(LNG0 + x / KX).toFixed(5), +(LAT0 + y / KZ).toFixed(5)],
-      descricao: `Instalado em ${2016 + Math.floor(r() * 11)} · cliente simulado` });
+      descricao: `Instalado em ${2016 + Math.floor(r() * 11)} · cliente simulado`, simulado: true });
   }
 })();

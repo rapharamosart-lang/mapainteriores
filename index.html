@@ -19,6 +19,8 @@
     --hover: rgba(31, 42, 51, .06);
     --madeira: #9a5b2e;
     --madeira-texto: #fff8f0;
+    --ok: #2f7d4f;
+    --erro: #b3261e;
     --rotulo: rgba(255, 255, 255, .92);
     --rotulo-texto: #2a3640;
     --fonte-titulo: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
@@ -28,16 +30,17 @@
     :root:not([data-theme="light"]) {
       --bg: #0e1a22; --painel: rgba(20, 29, 36, .93); --texto: #eef2f4; --suave: #9fb0bb;
       --borda: rgba(255, 255, 255, .1); --hover: rgba(255, 255, 255, .07);
-      --madeira: #d08a52; --madeira-texto: #1d130b; --rotulo: rgba(20, 29, 36, .85); --rotulo-texto: #e6edf1;
+      --madeira: #d08a52; --madeira-texto: #1d130b; --ok: #7fd19c; --erro: #ff8a80; --rotulo: rgba(20, 29, 36, .85); --rotulo-texto: #e6edf1;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --bg: #0e1a22; --painel: rgba(20, 29, 36, .93); --texto: #eef2f4; --suave: #9fb0bb;
     --borda: rgba(255, 255, 255, .1); --hover: rgba(255, 255, 255, .07);
-    --madeira: #d08a52; --madeira-texto: #1d130b; --rotulo: rgba(20, 29, 36, .85); --rotulo-texto: #e6edf1;
+    --madeira: #d08a52; --madeira-texto: #1d130b; --ok: #7fd19c; --erro: #ff8a80; --rotulo: rgba(20, 29, 36, .85); --rotulo-texto: #e6edf1;
     color-scheme: dark;
   }
+  *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html, body { margin: 0; }
   html, body { height: 100%; overflow: hidden; }
@@ -78,9 +81,29 @@
   .acoes button.ligado, #form .salvar { background: var(--madeira); color: var(--madeira-texto); border-color: transparent; }
   button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--madeira); outline-offset: 2px; }
 
-  #form { display: grid; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--borda); }
+  #form { display: grid; gap: 9px; padding: 14px 16px 16px; overflow-y: auto; overflow-x: hidden; min-height: 0; }
+  #form h3 { margin: 0; font: 700 16px var(--fonte-titulo); }
+  #form .local { display: grid; gap: 7px; padding: 10px; border-radius: 10px; background: var(--hover); }
+  #fLocal { font-size: 12.5px; color: var(--suave); }
+  #fLocal.ok { color: var(--ok); font-weight: 600; }
+  .erro { margin: 0; color: var(--erro); font-size: 12.5px; font-weight: 600; }
+  .topo-acoes { padding: 12px 16px 0; }
+  .primario { width: 100%; padding: 10px; border-radius: 10px; border: 0; background: var(--madeira); color: var(--madeira-texto);
+    font: 600 14px var(--fonte); cursor: pointer; }
+  .chave { display: flex; gap: 8px; align-items: center; padding: 9px 16px; font-size: 12.5px; color: var(--suave);
+    border-bottom: 1px solid var(--borda); cursor: pointer; }
+  #painel.cadastrando #lista, #painel.cadastrando .filtros, #painel.cadastrando .chave,
+  #painel.cadastrando .acoes, #painel.cadastrando .topo-acoes { display: none; }
+  #cartao .origem { margin-left: 6px; font-size: 11.5px; color: var(--suave); }
+  #cartao .cartao-acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
+  #cartao .cartao-acoes button { padding: 8px; border-radius: 9px; border: 1px solid var(--borda); background: var(--hover);
+    color: var(--texto); cursor: pointer; font: 600 12.5px var(--fonte); }
+  #cartao #cExcluir.confirmar { background: var(--erro); color: #fff; border-color: transparent; }
   #form label { display: grid; gap: 3px; font-size: 12px; color: var(--suave); }
-  #form input, #form select { padding: 8px; border-radius: 8px; border: 1px solid var(--borda); background: transparent;
+  #form textarea { resize: vertical; }
+  #form label, #form .linha > * { min-width: 0; }
+  #form input, #form select, #form textarea { width: 100%; min-width: 0; }
+  #form input, #form select, #form textarea { padding: 8px; border-radius: 8px; border: 1px solid var(--borda); background: transparent;
     color: var(--texto); font: 14px var(--fonte); }
   #form .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   #copia { margin: 0 16px 12px; height: 90px; font: 11px ui-monospace, monospace; background: transparent; color: var(--texto);
@@ -112,7 +135,7 @@
   #ajuda { position: fixed; z-index: 1; right: max(12px, env(safe-area-inset-right, 0px)); top: calc(12px + env(safe-area-inset-top, 0px));
     padding: 6px 10px; border-radius: 8px; background: var(--painel); color: var(--suave); font-size: 12px; }
 
-  #painel.recolhido #lista, #painel.recolhido .filtros, #painel.recolhido .acoes, #painel.recolhido #form, #painel.recolhido #copia { display: none; }
+  #painel.recolhido #lista, #painel.recolhido .filtros, #painel.recolhido .acoes, #painel.recolhido #form, #painel.recolhido .chave, #painel.recolhido #copia { display: none; }
 
   @media (max-width: 640px) {
     #painel { top: auto; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); left: max(8px, env(safe-area-inset-left, 0px));
@@ -127,36 +150,55 @@
 <body>
 <div id="cena"></div>
 <div id="abertura" aria-live="polite"><strong id="aNum">0</strong><span>clientes com móveis planejados em Maceió</span></div>
-<div id="aviso" hidden>Toque no mapa onde o móvel foi instalado</div>
+<div id="aviso" role="status" hidden></div>
 
 <aside id="painel">
   <header>
     <div>
       <h1>Interiores Móveis Planejados</h1>
-      <p><span id="contador">0</span> clientes em Maceió · simulação</p>
+      <p><span id="contador">0</span> clientes em Maceió<span id="rotuloSim"> · inclui simulação</span></p>
     </div>
     <button id="recolher" aria-label="Recolher painel">▾</button>
   </header>
+  <div class="topo-acoes"><button id="btnNovo" class="primario">＋ Cadastrar cliente</button></div>
   <div class="filtros" id="filtros"></div>
+  <label class="chave"><input type="checkbox" id="chkSimulados"> Mostrar clientes simulados</label>
   <ul id="lista"></ul>
   <form id="form" hidden>
-    <label>Nome do ambiente<input id="fNome" required placeholder="Cozinha da família Silva"></label>
+    <h3 id="fTitulo">Novo cliente</h3>
+    <label>Nome do cliente<input id="fNome" required autocomplete="off" placeholder="Maria Souza"></label>
+    <label>Endereço<input id="fEndereco" autocomplete="off" placeholder="Rua Jangadeiros Alagoanos, 1200"></label>
     <div class="linha">
-      <label>Bairro<input id="fBairro" placeholder="Ponta Verde"></label>
-      <label>Tipo<select id="fTipo"></select></label>
+      <label>Bairro<input id="fBairro" list="listaBairros" autocomplete="off" placeholder="Pajuçara"></label>
+      <label>Ambiente<select id="fTipo"></select></label>
     </div>
+    <div class="linha">
+      <label>Instalação<input id="fData" type="month"></label>
+      <label>Telefone<input id="fTelefone" type="tel" autocomplete="off" placeholder="(82) 9 0000-0000"></label>
+    </div>
+    <label>Observações<textarea id="fObs" rows="2" placeholder="Cozinha em L com ilha, MDF freijó"></textarea></label>
+    <div class="local">
+      <span id="fLocal">Localização ainda não definida</span>
+      <div class="linha">
+        <button type="button" id="fBuscar">Localizar endereço</button>
+        <button type="button" id="fMarcar">Marcar no mapa</button>
+      </div>
+    </div>
+    <p id="fErro" class="erro" hidden></p>
     <div class="linha">
       <button type="button" id="fCancelar">Cancelar</button>
-      <button type="submit" class="salvar">Salvar ponto</button>
+      <button type="submit" class="salvar">Salvar cliente</button>
     </div>
   </form>
+  <datalist id="listaBairros"></datalist>
+  <input type="file" id="arquivo" accept=".csv,text/csv" hidden>
   <div class="acoes">
     <button id="btnTour">Tour pela cidade</button>
     <button id="btnVisao">Ver a cidade toda</button>
     <button id="btnSatelite">Satélite</button>
     <button id="btnAbertura">Rever abertura</button>
-    <button id="btnAdicionar">Adicionar ponto</button>
-    <button id="btnExportar">Baixar lista</button>
+    <button id="btnExportar">Baixar planilha</button>
+    <button id="btnImportar">Importar planilha</button>
   </div>
 </aside>
 
@@ -165,8 +207,13 @@
   <h2 id="cNome"></h2>
   <p id="cBairro"></p>
   <p id="cDesc"></p>
-  <span class="etiqueta" id="cTipo"></span>
+  <p id="cObs"></p>
+  <span class="etiqueta" id="cTipo"></span><span class="origem" id="cOrigem"></span>
   <a id="cGoogle" href="#" target="_blank" rel="noopener">Abrir no Google Maps ↗</a>
+  <div class="cartao-acoes" id="cAcoes" hidden>
+    <button id="cEditar">Editar</button>
+    <button id="cExcluir">Excluir</button>
+  </div>
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -177,12 +224,18 @@ const VISAO_GERAL = { center: [-35.70, -9.58], zoom: 11.2, pitch: 35, bearing: -
 const calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- Estado ----------
-const CHAVE = 'mapa-maceio-pontos-extras';
-const lerExtras = () => { try { return JSON.parse(localStorage.getItem(CHAVE)) || []; } catch { return []; } };
-const salvarExtras = () => { try { localStorage.setItem(CHAVE, JSON.stringify(extras)); } catch {} };
-let extras = lerExtras();
+const CHAVE = 'interiores-clientes-reais', CHAVE_SIM = 'interiores-mostrar-simulados';
+const ler = (k, padrao) => { try { const v = localStorage.getItem(k); return v === null ? padrao : JSON.parse(v); } catch { return padrao; } };
+const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+// clientes cadastrados neste aparelho (migra os pontos da versão anterior)
+let reais = ler(CHAVE, null) ?? ler('mapa-maceio-pontos-extras', []);
+reais.forEach((p, i) => { p.id ??= Date.now() + i; });
+const salvarReais = () => gravar(CHAVE, reais);
+let mostrarSimulados = ler(CHAVE_SIM, true);
 const ativos = new Set(Object.keys(TIPOS));
-const todos = () => [...PONTOS, ...extras.map(p => ({ ...p, extra: true }))];
+// ordem: showroom e clientes fixos, cadastrados aqui, depois os simulados
+const todos = () => [...PONTOS.filter(p => !p.simulado), ...reais.map(p => ({ ...p, local: true })),
+  ...(mostrarSimulados ? PONTOS.filter(p => p.simulado) : [])];
 const visiveis = () => todos().filter(p => ativos.has(p.tipo));
 const clientes = () => visiveis().filter(p => p.tipo !== 'loja').length;
 let pontos = [];          // pontos visíveis, com hora de nascimento na abertura
@@ -345,22 +398,15 @@ function renderizar() {
     li.tabIndex = 0;
     li.innerHTML = `<i style="background:${TIPOS[p.tipo].cor}"></i><div><b></b><small></small></div>`;
     li.querySelector('b').textContent = p.nome;
-    li.querySelector('small').textContent = `${p.bairro || 'Maceió'} · ${TIPOS[p.tipo].nome}`;
+    li.querySelector('small').textContent = `${p.bairro || 'Maceió'} · ${TIPOS[p.tipo].nome}${p.local ? ' · cadastrado' : ''}`;
     li.onclick = () => selecionar(p);
     li.onkeydown = e => { if (e.key === 'Enter') selecionar(p); };
     p.li = li;
-    if (p.extra) {
-      const b = document.createElement('button');
-      b.className = 'apagar';
-      b.setAttribute('aria-label', 'Remover ponto');
-      b.textContent = '×';
-      b.onclick = e => { e.stopPropagation(); extras = extras.filter(x => x.id !== p.id); salvarExtras(); renderizar(); };
-      li.appendChild(b);
-    }
     frag.appendChild(li);
   });
   lista.appendChild(frag);
   document.getElementById('contador').textContent = clientes();
+  document.getElementById('rotuloSim').hidden = !mostrarSimulados;
   animando = true;
 }
 
@@ -373,7 +419,8 @@ function montarFiltros() {
     b.innerHTML = `<i style="background:${t.cor}"></i>${t.nome}`;
     b.onclick = () => { ativos.has(k) ? ativos.delete(k) : ativos.add(k); b.setAttribute('aria-pressed', ativos.has(k)); renderizar(); };
     caixa.appendChild(b);
-    sel.add(new Option(t.nome, k));
+    b.dataset.tipo = k;
+    if (k !== 'loja') sel.add(new Option(t.nome, k));
   });
 }
 
@@ -384,8 +431,14 @@ function selecionar(p) {
   animando = true;
   mapa.flyTo({ center: p.coord, zoom: 16.6, pitch: 62, bearing: mapa.getBearing() + 25, speed: 0.9, essential: true });
   document.getElementById('cNome').textContent = p.nome;
-  document.getElementById('cBairro').textContent = `${p.bairro ? p.bairro + ', ' : ''}Maceió – AL`;
-  document.getElementById('cDesc').textContent = p.descricao || '';
+  document.getElementById('cBairro').textContent = [p.endereco, p.bairro, 'Maceió – AL'].filter(Boolean).join(', ');
+  const [ano, mes] = (p.data || '').split('-');
+  document.getElementById('cDesc').textContent = p.descricao || [ano && `Instalado em ${mes}/${ano}`, p.telefone].filter(Boolean).join(' · ');
+  document.getElementById('cObs').textContent = p.obs || '';
+  document.getElementById('cOrigem').textContent = p.simulado ? 'simulado' : p.local ? 'cadastrado neste aparelho' : '';
+  document.getElementById('cAcoes').hidden = !p.local;
+  document.getElementById('cExcluir').classList.remove('confirmar');
+  document.getElementById('cExcluir').textContent = 'Excluir';
   const et = document.getElementById('cTipo');
   et.textContent = TIPOS[p.tipo].nome;
   et.style.background = TIPOS[p.tipo].cor;
@@ -424,45 +477,243 @@ document.getElementById('btnTour').onclick = async e => {
   document.getElementById('btnVisao').click();
 };
 
-let modoAdicionar = false, novaCoord = null;
-function alternarAdicionar(ligar) {
-  modoAdicionar = ligar;
-  document.getElementById('btnAdicionar').classList.toggle('ligado', ligar);
-  document.getElementById('aviso').hidden = !ligar;
-  document.getElementById('form').hidden = true;
-  mapa.getCanvas().style.cursor = ligar ? 'crosshair' : '';
+// ---------- Cadastro de clientes reais ----------
+const $ = id => document.getElementById(id);
+const normalizar = t => (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+let modoAdicionar = false, novaCoord = null, editando = null, marcadorNovo = null, avisoTimer = null;
+
+function avisar(texto, ms = 3500) {
+  clearTimeout(avisoTimer);
+  $('aviso').textContent = texto;
+  $('aviso').hidden = false;
+  if (ms) avisoTimer = setTimeout(() => { $('aviso').hidden = true; }, ms);
 }
-document.getElementById('btnAdicionar').onclick = () => alternarAdicionar(!modoAdicionar);
-document.getElementById('fCancelar').onclick = () => alternarAdicionar(false);
+function erroForm(texto) { $('fErro').textContent = texto; $('fErro').hidden = false; }
+
+function definirLocal(coord, texto) {
+  novaCoord = coord.map(v => +(+v).toFixed(5));
+  if (!marcadorNovo) {
+    marcadorNovo = new maplibregl.Marker({ draggable: true, color: '#9a5b2e' }).setLngLat(novaCoord).addTo(mapa);
+    marcadorNovo.on('dragend', () => { const { lng, lat } = marcadorNovo.getLngLat(); definirLocal([lng, lat], 'Posição ajustada'); });
+  } else marcadorNovo.setLngLat(novaCoord);
+  $('fLocal').textContent = `✓ ${texto}. Arraste o marcador para ajustar.`;
+  $('fLocal').classList.add('ok');
+  $('fErro').hidden = true;
+}
+function sairMarcar() {
+  modoAdicionar = false;
+  $('fMarcar').classList.remove('ligado');
+  mapa.getCanvas().style.cursor = '';
+  if ($('aviso').textContent.startsWith('Toque')) $('aviso').hidden = true;
+}
+function abrirForm(p) {
+  fecharCartao();
+  sairMarcar();
+  $('form').reset();
+  editando = p?.id ?? null;
+  novaCoord = null;
+  $('fTitulo').textContent = p ? 'Editar cliente' : 'Novo cliente';
+  $('fErro').hidden = true;
+  $('fLocal').textContent = 'Localização ainda não definida';
+  $('fLocal').classList.remove('ok');
+  if (p) {
+    $('fNome').value = p.nome; $('fEndereco').value = p.endereco || ''; $('fBairro').value = p.bairro || '';
+    $('fTipo').value = p.tipo; $('fData').value = p.data || ''; $('fTelefone').value = p.telefone || ''; $('fObs').value = p.obs || '';
+    definirLocal(p.coord, 'Localização salva');
+    mapa.flyTo({ center: p.coord, zoom: 16.5, pitch: 60, essential: true });
+  }
+  const painel = $('painel');
+  painel.classList.add('cadastrando');
+  painel.classList.remove('recolhido');
+  $('recolher').textContent = '▾';
+  $('form').hidden = false;
+  $('fNome').focus();
+}
+function fecharForm() {
+  $('form').hidden = true;
+  $('painel').classList.remove('cadastrando');
+  sairMarcar();
+  marcadorNovo?.remove();
+  marcadorNovo = null;
+  editando = null;
+}
+$('btnNovo').onclick = () => abrirForm();
+$('fCancelar').onclick = fecharForm;
+
+$('fMarcar').onclick = () => {
+  if (modoAdicionar) return sairMarcar();
+  modoAdicionar = true;
+  $('fMarcar').classList.add('ligado');
+  mapa.getCanvas().style.cursor = 'crosshair';
+  avisar('Toque no mapa onde o móvel foi instalado', 0);
+  if (innerWidth <= 640) $('painel').classList.add('recolhido');
+};
 mapa.on('click', e => {
   if (!modoAdicionar) return;
-  novaCoord = [+e.lngLat.lng.toFixed(5), +e.lngLat.lat.toFixed(5)];
-  document.getElementById('aviso').hidden = true;
-  document.getElementById('form').hidden = false;
-  document.getElementById('painel').classList.remove('recolhido');
-  document.getElementById('fNome').focus();
-});
-document.getElementById('form').addEventListener('submit', e => {
-  e.preventDefault();
-  const tipo = document.getElementById('fTipo').value;
-  extras.push({ id: Date.now(), nome: document.getElementById('fNome').value.trim(), bairro: document.getElementById('fBairro').value.trim(), tipo, coord: novaCoord });
-  salvarExtras();
-  ativos.add(tipo);
-  e.target.reset();
-  alternarAdicionar(false);
-  renderizar();
-  selecionar(pontos[pontos.length - 1]);
+  definirLocal([e.lngLat.lng, e.lngLat.lat], 'Local marcado no mapa');
+  sairMarcar();
+  $('painel').classList.remove('recolhido');
 });
 
-document.getElementById('btnExportar').onclick = () => {
-  const linhas = [['nome', 'bairro', 'tipo', 'latitude', 'longitude', 'descricao'],
-    ...todos().map(p => [p.nome, p.bairro || '', TIPOS[p.tipo].nome, p.coord[1], p.coord[0], p.descricao || ''])];
-  const csv = linhas.map(l => l.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
+// Busca de endereço no OpenStreetMap (Nominatim), limitada a Maceió.
+async function geocodificar(endereco, bairro) {
+  const q = [endereco, bairro, 'Maceió', 'Alagoas', 'Brasil'].filter(Boolean).join(', ');
+  const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br'
+    + '&viewbox=-35.82,-9.36,-35.55,-9.72&bounded=1&q=' + encodeURIComponent(q);
+  const r = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } });
+  if (!r.ok) throw new Error('busca indisponível');
+  const [achou] = await r.json();
+  return achou ? [+achou.lon, +achou.lat] : null;
+}
+const centroBairro = nome => { const b = BAIRROS.find(b => normalizar(b[0]) === normalizar(nome)); return b ? [b[1], b[2]] : null; };
+
+$('fBuscar').onclick = async () => {
+  const endereco = $('fEndereco').value.trim(), bairro = $('fBairro').value.trim();
+  if (!endereco && !bairro) return erroForm('Preencha o endereço ou o bairro para localizar.');
+  $('fBuscar').disabled = true;
+  $('fLocal').classList.remove('ok');
+  $('fLocal').textContent = 'Procurando endereço…';
+  let coord = null, texto = 'Endereço encontrado';
+  try { coord = await geocodificar(endereco, bairro); } catch { texto = ''; }
+  if (!coord && centroBairro(bairro)) { coord = centroBairro(bairro); texto = 'Endereço não encontrado; usei o centro do bairro'; }
+  $('fBuscar').disabled = false;
+  if (coord) {
+    definirLocal(coord, texto);
+    mapa.flyTo({ center: coord, zoom: 16.5, pitch: 60, essential: true });
+  } else {
+    $('fLocal').textContent = 'Localização ainda não definida';
+    erroForm('Não encontrei esse endereço. Toque em "Marcar no mapa" e indique o local.');
+  }
+};
+
+$('form').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!novaCoord) return erroForm('Defina a localização: "Localizar endereço" ou "Marcar no mapa".');
+  const dados = {
+    nome: $('fNome').value.trim(), endereco: $('fEndereco').value.trim(), bairro: $('fBairro').value.trim(),
+    tipo: $('fTipo').value, data: $('fData').value, telefone: $('fTelefone').value.trim(), obs: $('fObs').value.trim(), coord: novaCoord
+  };
+  let id = editando;
+  if (id) Object.assign(reais.find(r => r.id === id), dados);
+  else { id = Date.now(); reais.push({ id, ...dados, criado: new Date().toISOString() }); }
+  salvarReais();
+  ativos.add(dados.tipo);
+  document.querySelectorAll('.filtro').forEach(b => b.setAttribute('aria-pressed', ativos.has(b.dataset.tipo)));
+  const novo = !editando;
+  fecharForm();
+  renderizar();
+  const p = pontos.find(x => x.local && x.id === id);
+  if (p && novo) p.nasce = relogio;   // o pino novo pipoca no mapa
+  selecionar(p);
+  avisar(novo ? 'Cliente cadastrado' : 'Alterações salvas');
+});
+
+$('cEditar').onclick = () => { if (selecionado?.local) abrirForm(reais.find(r => r.id === selecionado.id)); };
+$('cExcluir').onclick = e => {
+  const b = e.currentTarget;
+  if (!b.classList.contains('confirmar')) { b.classList.add('confirmar'); b.textContent = 'Confirmar exclusão'; return; }
+  reais = reais.filter(r => r.id !== selecionado.id);
+  salvarReais();
+  fecharCartao();
+  renderizar();
+  avisar('Cliente excluído');
+};
+
+$('chkSimulados').checked = mostrarSimulados;
+$('chkSimulados').onchange = e => { mostrarSimulados = e.target.checked; gravar(CHAVE_SIM, mostrarSimulados); fecharCartao(); renderizar(); };
+BAIRROS.forEach(([nome]) => $('listaBairros').append(new Option(nome)));
+
+// ---------- Planilha ----------
+const COLUNAS = ['nome', 'endereco', 'bairro', 'ambiente', 'instalacao', 'telefone', 'observacoes', 'latitude', 'longitude'];
+$('btnExportar').onclick = () => {
+  const lista = todos().filter(p => !p.simulado && p.tipo !== 'loja');
+  if (!lista.length) return avisar('Nenhum cliente cadastrado ainda');
+  const linhas = [COLUNAS, ...lista.map(p => [p.nome, p.endereco || '', p.bairro || '', TIPOS[p.tipo].nome, p.data || '',
+    p.telefone || '', p.obs || '', p.coord[1], p.coord[0]])];
+  const csv = linhas.map(l => l.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' }));
   a.download = 'clientes-interiores.csv';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+function lerCSV(texto) {
+  const sep = (texto.split('\n')[0].match(/;/g) || []).length >= (texto.split('\n')[0].match(/,/g) || []).length ? ';' : ',';
+  const linhas = [];
+  let linha = [], campo = '', aspas = false;
+  for (let i = 0; i < texto.length; i++) {
+    const c = texto[i];
+    if (aspas) {
+      if (c === '"' && texto[i + 1] === '"') { campo += '"'; i++; }
+      else if (c === '"') aspas = false;
+      else campo += c;
+    } else if (c === '"') aspas = true;
+    else if (c === sep) { linha.push(campo); campo = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && texto[i + 1] === '\n') i++;
+      linha.push(campo); campo = '';
+      if (linha.some(v => v.trim())) linhas.push(linha);
+      linha = [];
+    } else campo += c;
+  }
+  linha.push(campo);
+  if (linha.some(v => v.trim())) linhas.push(linha);
+  return linhas;
+}
+function tipoDe(texto) {
+  const t = normalizar(texto);
+  if (t.startsWith('dorm') || t.includes('quarto') || t.includes('closet')) return 'dormitorio';
+  if (t.startsWith('sala') || t.includes('home')) return 'sala';
+  if (t.startsWith('escr') || t.includes('consult')) return 'escritorio';
+  if (t.startsWith('banh') || t.includes('lavabo')) return 'banheiro';
+  return 'cozinha';
+}
+$('btnImportar').onclick = () => $('arquivo').click();
+$('arquivo').onchange = async e => {
+  const arquivo = e.target.files[0];
+  e.target.value = '';
+  if (!arquivo) return;
+  const [cab, ...linhas] = lerCSV((await arquivo.text()).replace(/^﻿/, ''));
+  if (!cab || !linhas.length) return avisar('A planilha está vazia');
+  const idx = {};
+  cab.forEach((c, i) => {
+    const n = normalizar(c);
+    const chave = n.startsWith('nome') || n === 'cliente' ? 'nome' : n.startsWith('ender') || n === 'rua' ? 'endereco'
+      : n.startsWith('bairro') ? 'bairro' : n.startsWith('ambiente') || n.startsWith('tipo') ? 'ambiente'
+      : n.startsWith('instal') || n.startsWith('data') ? 'instalacao' : n.startsWith('tel') || n.startsWith('fone') ? 'telefone'
+      : n.startsWith('obs') || n.startsWith('descr') ? 'observacoes' : n.startsWith('lat') ? 'latitude'
+      : n.startsWith('lon') || n === 'lng' ? 'longitude' : null;
+    if (chave && !(chave in idx)) idx[chave] = i;
+  });
+  if (!('nome' in idx)) return avisar('A planilha precisa de uma coluna "nome"', 5000);
+  let novos = 0, semLocal = 0;
+  for (let n = 0; n < linhas.length; n++) {
+    const v = k => (idx[k] === undefined ? '' : (linhas[n][idx[k]] || '').trim());
+    if (!v('nome')) continue;
+    avisar(`Importando ${n + 1} de ${linhas.length}…`, 0);
+    let coord = null;
+    const lat = parseFloat(v('latitude').replace(',', '.')), lng = parseFloat(v('longitude').replace(',', '.'));
+    if (isFinite(lat) && isFinite(lng)) coord = [lng, lat];
+    else if (v('endereco')) {
+      try { coord = await geocodificar(v('endereco'), v('bairro')); } catch {}
+      await new Promise(r => setTimeout(r, 1100));   // a busca pede no máximo 1 consulta por segundo
+    }
+    coord ??= centroBairro(v('bairro'));
+    if (!coord) { semLocal++; continue; }
+    const inst = v('instalacao');
+    let m = inst.match(/^(\d{4})-(\d{1,2})/), data = '';
+    if (m) data = `${m[1]}-${m[2].padStart(2, '0')}`;
+    else if ((m = inst.match(/^(\d{1,2})\/(\d{4})$/))) data = `${m[2]}-${m[1].padStart(2, '0')}`;
+    else if ((m = inst.match(/^(\d{4})$/))) data = `${m[1]}-01`;
+    reais.push({ id: Date.now() + n, nome: v('nome'), endereco: v('endereco'), bairro: v('bairro'), tipo: tipoDe(v('ambiente')),
+      data,
+      telefone: v('telefone'), obs: v('observacoes'), coord: coord.map(x => +(+x).toFixed(5)) });
+    novos++;
+  }
+  salvarReais();
+  renderizar();
+  avisar(`${novos} cliente(s) importado(s)${semLocal ? `; ${semLocal} sem localização encontrada` : ''}`, 6000);
 };
 
 document.getElementById('recolher').onclick = e => {

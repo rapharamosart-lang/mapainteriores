@@ -16,12 +16,22 @@ https://rapharamosart-lang.github.io/mapainteriores/maquete.html (maquete)
 
 Para ativar: **Settings → Pages → Deploy from a branch → `main` / (root)**.
 
-## Clientes
+## Cadastrar clientes reais
 
-`dados.js` tem o contorno de Maceió (IBGE), os bairros, os tipos de ambiente e os pontos.
-Hoje há o showroom e 527 clientes **simulados** (`TOTAL_SIMULADOS`).
-Para usar clientes reais: troque a lista `PONTOS` (coordenadas em `[longitude, latitude]`) e ponha `TOTAL_SIMULADOS = 0`.
-"Baixar lista" exporta todos os pontos em CSV (abre no Excel).
+No mapa, **＋ Cadastrar cliente** abre o formulário: nome, endereço, bairro, ambiente, mês de instalação,
+telefone e observações. A localização vem de **Localizar endereço** (busca no OpenStreetMap; se não achar,
+usa o centro do bairro) ou de **Marcar no mapa**; o marcador pode ser arrastado para ajustar.
+No cartão do cliente há **Editar** e **Excluir**.
+
+Os cadastros ficam salvos **no navegador do aparelho** onde foram feitos. Para levar para outro aparelho
+ou guardar cópia: **Baixar planilha** (CSV, abre no Excel) e **Importar planilha** no outro aparelho.
+A planilha aceita as colunas nome, endereco, bairro, ambiente, instalacao, telefone, observacoes,
+latitude, longitude (só "nome" é obrigatória; sem coordenadas, o endereço é buscado).
+
+Para deixar os clientes fixos no site para todo mundo, eles entram na lista `PONTOS` de `dados.js`.
+Atenção: o site é público — não coloque telefone nem nome completo de cliente em `dados.js` sem autorização.
+
+"Mostrar clientes simulados" liga e desliga os 527 clientes de exemplo (`TOTAL_SIMULADOS` em `dados.js`).
 
 ## Fontes
 
