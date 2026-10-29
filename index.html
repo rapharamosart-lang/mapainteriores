@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Interiores Móveis Planejados</title>
+<meta name="description" content="Mapa 3D de Maceió com os clientes da Interiores Móveis Planejados.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<style>
+  /* Layout: cena 3D ocupando a tela, painel flutuante à esquerda (folha inferior no celular). */
+  :root {
+    --bg: #cfe3ee;
+    --painel: rgba(255, 252, 247, .94);
+    --texto: #1f2a33;
+    --suave: #5d6b76;
+    --borda: rgba(31, 42, 51, .12);
+    --hover: rgba(31, 42, 51, .06);
+    --madeira: #9a5b2e;
+    --madeira-texto: #fff8f0;
+    --rotulo: rgba(255, 255, 255, .92);
+    --rotulo-texto: #2a3640;
+    --fonte-titulo: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --fonte: "Figtree", "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1a22; --painel: rgba(20, 29, 36, .93); --texto: #eef2f4; --suave: #9fb0bb;
+      --borda: rgba(255, 255, 255, .1); --hover: rgba(255, 255, 255, .07);
+      --madeira: #d08a52; --madeira-texto: #1d130b; --rotulo: rgba(20, 29, 36, .85); --rotulo-texto: #e6edf1;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1a22; --painel: rgba(20, 29, 36, .93); --texto: #eef2f4; --suave: #9fb0bb;
+    --borda: rgba(255, 255, 255, .1); --hover: rgba(255, 255, 255, .07);
+    --madeira: #d08a52; --madeira-texto: #1d130b; --rotulo: rgba(20, 29, 36, .85); --rotulo-texto: #e6edf1;
+    color-scheme: dark;
+  }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body { background: var(--bg); color: var(--texto); font-family: var(--fonte); font-size: 14px; }
+  #cena { position: fixed; inset: 0; }
+
+  #painel { position: fixed; z-index: 2; top: calc(12px + env(safe-area-inset-top, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px)); width: 330px;
+    max-height: calc(100% - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    display: flex; flex-direction: column; background: var(--painel); border: 1px solid var(--borda);
+    border-radius: 16px; backdrop-filter: blur(10px); box-shadow: 0 12px 34px rgba(0, 0, 0, .18); }
+  #painel header { display: flex; gap: 10px; align-items: flex-start; padding: 16px 16px 12px; border-bottom: 1px solid var(--borda); }
+  #painel h1 { margin: 0; font: 700 19px/1.15 var(--fonte-titulo); text-wrap: balance; }
+  #painel header p { margin: 4px 0 0; color: var(--suave); font-size: 13px; }
+  #contador { color: var(--madeira); font-weight: 700; font-variant-numeric: tabular-nums; }
+  #recolher { margin-left: auto; flex: none; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--borda);
+    background: transparent; color: var(--texto); cursor: pointer; font-size: 14px; }
+
+  .filtros { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--borda); }
+  .filtro { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--borda); background: transparent; color: var(--texto); cursor: pointer; font: 500 12px var(--fonte); }
+  .filtro i { width: 9px; height: 9px; border-radius: 50%; }
+  .filtro[aria-pressed="false"] { opacity: .4; text-decoration: line-through; }
+
+  #lista { list-style: none; margin: 0; padding: 6px; overflow-y: auto; flex: 1; min-height: 60px; }
+  #lista li { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; cursor: pointer; }
+  #lista li:hover, #lista li.ativo { background: var(--hover); }
+  #lista li > i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  #lista li > div { min-width: 0; }
+  #lista b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #lista small { color: var(--suave); }
+  #lista .apagar { margin-left: auto; flex: none; background: none; border: 0; color: var(--suave); cursor: pointer; font-size: 18px; }
+
+  .acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 12px 16px 16px; border-top: 1px solid var(--borda); }
+  .acoes button, #form button { padding: 9px 8px; border-radius: 9px; border: 1px solid var(--borda); background: var(--hover);
+    color: var(--texto); cursor: pointer; font: 600 12.5px var(--fonte); }
+  .acoes button:hover { filter: brightness(1.05); border-color: var(--suave); }
+  .acoes button.ligado, #form .salvar { background: var(--madeira); color: var(--madeira-texto); border-color: transparent; }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--madeira); outline-offset: 2px; }
+
+  #form { display: grid; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--borda); }
+  #form label { display: grid; gap: 3px; font-size: 12px; color: var(--suave); }
+  #form input, #form select { padding: 8px; border-radius: 8px; border: 1px solid var(--borda); background: transparent;
+    color: var(--texto); font: 14px var(--fonte); }
+  #form .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  #copia { margin: 0 16px 12px; height: 90px; font: 11px ui-monospace, monospace; background: transparent; color: var(--texto);
+    border: 1px solid var(--borda); border-radius: 8px; }
+
+  #abertura { position: fixed; z-index: 3; left: 50%; top: calc(9% + env(safe-area-inset-top, 0px)); transform: translateX(-50%);
+    display: grid; justify-items: center; gap: 2px; padding: 14px 26px 16px; border-radius: 20px; text-align: center;
+    background: var(--painel); border: 1px solid var(--borda); box-shadow: 0 14px 40px rgba(0, 0, 0, .2);
+    backdrop-filter: blur(10px); pointer-events: none; transition: opacity .6s, transform .6s; }
+  #abertura strong { font: 700 clamp(48px, 9vw, 84px)/1 var(--fonte-titulo); color: var(--madeira); font-variant-numeric: tabular-nums; }
+  #abertura span { color: var(--suave); font-weight: 500; max-width: 26ch; text-wrap: balance; }
+  #abertura.saindo { opacity: 0; transform: translateX(-50%) translateY(-14px); }
+  #abertura .pulo { animation: pulo .3s ease-out; }
+  @keyframes pulo { from { transform: scale(1.18); } to { transform: scale(1); } }
+  #aviso { position: fixed; z-index: 3; top: calc(14px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%);
+    padding: 8px 16px; background: var(--madeira); color: var(--madeira-texto); border-radius: 999px; font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .2); }
+
+  #cartao { position: fixed; z-index: 2; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: 290px; padding: 14px 16px; background: var(--painel); border: 1px solid var(--borda); border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .18); backdrop-filter: blur(10px); }
+  #cartao h2 { margin: 0 0 2px; font: 700 17px var(--fonte-titulo); }
+  #cartao p { margin: 2px 0; color: var(--suave); }
+  #cartao .etiqueta { display: inline-block; margin: 8px 0 10px; padding: 3px 9px; border-radius: 999px; color: #fff; font-size: 11.5px; font-weight: 600; }
+  #cartao a { display: block; color: var(--madeira); font-weight: 600; text-decoration: none; }
+  #cartao a:hover { text-decoration: underline; }
+  #fecharCartao { position: absolute; top: 8px; right: 10px; background: none; border: 0; color: var(--suave); cursor: pointer; font-size: 18px; }
+  .maplibregl-ctrl-top-right { top: env(safe-area-inset-top, 0px); right: env(safe-area-inset-right, 0px); }
+  #ajuda { position: fixed; z-index: 1; right: max(12px, env(safe-area-inset-right, 0px)); top: calc(12px + env(safe-area-inset-top, 0px));
+    padding: 6px 10px; border-radius: 8px; background: var(--painel); color: var(--suave); font-size: 12px; }
+
+  #painel.recolhido #lista, #painel.recolhido .filtros, #painel.recolhido .acoes, #painel.recolhido #form, #painel.recolhido #copia { display: none; }
+
+  @media (max-width: 640px) {
+    #painel { top: auto; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); left: max(8px, env(safe-area-inset-left, 0px));
+      right: max(8px, env(safe-area-inset-right, 0px)); width: auto; max-height: 52%; }
+    #cartao { left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); width: auto;
+      top: calc(8px + env(safe-area-inset-top, 0px)); bottom: auto; }
+    .maplibregl-ctrl-top-right { top: env(safe-area-inset-top, 0px); right: env(safe-area-inset-right, 0px); }
+  #ajuda { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="cena"></div>
+<div id="abertura" aria-live="polite"><strong id="aNum">0</strong><span>clientes com móveis planejados em Maceió</span></div>
+<div id="aviso" hidden>Toque no mapa onde o móvel foi instalado</div>
+
+<aside id="painel">
+  <header>
+    <div>
+      <h1>Interiores Móveis Planejados</h1>
+      <p><span id="contador">0</span> clientes em Maceió · simulação</p>
+    </div>
+    <button id="recolher" aria-label="Recolher painel">▾</button>
+  </header>
+  <div class="filtros" id="filtros"></div>
+  <ul id="lista"></ul>
+  <form id="form" hidden>
+    <label>Nome do ambiente<input id="fNome" required placeholder="Cozinha da família Silva"></label>
+    <div class="linha">
+      <label>Bairro<input id="fBairro" placeholder="Ponta Verde"></label>
+      <label>Tipo<select id="fTipo"></select></label>
+    </div>
+    <div class="linha">
+      <button type="button" id="fCancelar">Cancelar</button>
+      <button type="submit" class="salvar">Salvar ponto</button>
+    </div>
+  </form>
+  <div class="acoes">
+    <button id="btnTour">Tour pela cidade</button>
+    <button id="btnVisao">Ver a cidade toda</button>
+    <button id="btnSatelite">Satélite</button>
+    <button id="btnAbertura">Rever abertura</button>
+    <button id="btnAdicionar">Adicionar ponto</button>
+    <button id="btnExportar">Baixar lista</button>
+  </div>
+</aside>
+
+<div id="cartao" hidden>
+  <button id="fecharCartao" aria-label="Fechar">×</button>
+  <h2 id="cNome"></h2>
+  <p id="cBairro"></p>
+  <p id="cDesc"></p>
+  <span class="etiqueta" id="cTipo"></span>
+  <a id="cGoogle" href="#" target="_blank" rel="noopener">Abrir no Google Maps ↗</a>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="dados.js"></script>
+<script>
+const VISAO_CIDADE = { center: [-35.722, -9.638], zoom: 13.1, pitch: 60, bearing: -24 };
+const VISAO_GERAL = { center: [-35.70, -9.58], zoom: 11.2, pitch: 35, bearing: -10 };
+const calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- Estado ----------
+const CHAVE = 'mapa-maceio-pontos-extras';
+const lerExtras = () => { try { return JSON.parse(localStorage.getItem(CHAVE)) || []; } catch { return []; } };
+const salvarExtras = () => { try { localStorage.setItem(CHAVE, JSON.stringify(extras)); } catch {} };
+let extras = lerExtras();
+const ativos = new Set(Object.keys(TIPOS));
+const todos = () => [...PONTOS, ...extras.map(p => ({ ...p, extra: true }))];
+const visiveis = () => todos().filter(p => ativos.has(p.tipo));
+const clientes = () => visiveis().filter(p => p.tipo !== 'loja').length;
+let pontos = [];          // pontos visíveis, com hora de nascimento na abertura
+let abertura = null;
+let selecionado = null;
+
+// ---------- Mapa ----------
+const mapa = new maplibregl.Map({
+  container: 'cena',
+  style: 'https://tiles.openfreemap.org/styles/liberty',
+  ...VISAO_GERAL, pitch: 0, bearing: 0,
+  maxPitch: 78, antialias: true, attributionControl: { compact: true }
+});
+mapa.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+mapa.addControl(new maplibregl.FullscreenControl(), 'top-right');
+
+// Coluna hexagonal (polígono) em volta do ponto, em metros.
+function coluna([lng, lat], metros) {
+  const dx = metros / (111320 * Math.cos(lat * Math.PI / 180)), dy = metros / 110540, anel = [];
+  for (let i = 0; i <= 6; i++) { const a = i / 6 * Math.PI * 2 + 0.5; anel.push([lng + dx * Math.cos(a), lat + dy * Math.sin(a)]); }
+  return [anel];
+}
+const easeOutBack = k => 1 + 2.7 * Math.pow(k - 1, 3) + 1.7 * Math.pow(k - 1, 2);
+
+// Monta os GeoJSON do quadro atual (só pontos já nascidos, com o "pulo" da abertura).
+function dadosQuadro(t) {
+  const pinos = [], colunas = [];
+  pontos.forEach((p, i) => {
+    if (t < p.nasce) return;
+    const k = Math.min(1, (t - p.nasce) / 520), pop = easeOutBack(k);
+    const loja = p.tipo === 'loja';
+    const props = { i, cor: TIPOS[p.tipo].cor, pop, onda: 1 - k, loja, sel: p === selecionado };
+    pinos.push({ type: 'Feature', id: i, properties: props, geometry: { type: 'Point', coordinates: p.coord } });
+    colunas.push({ type: 'Feature', id: i, properties: { ...props, altura: (loja ? 260 : 90 + (i % 7) * 12) * pop },
+      geometry: { type: 'Polygon', coordinates: coluna(p.coord, loja ? 45 : 22) } });
+  });
+  return [{ type: 'FeatureCollection', features: pinos }, { type: 'FeatureCollection', features: colunas }];
+}
+function atualizarFontes(t) {
+  if (!mapa.getSource('pinos')) return;
+  const [pinos, colunas] = dadosQuadro(t);
+  mapa.getSource('pinos').setData(pinos);
+  mapa.getSource('colunas').setData(colunas);
+}
+
+// fator de tamanho do pino: pulo da abertura × destaque do showroom ou do selecionado
+const TAM = ['*', ['get', 'pop'], ['case', ['get', 'loja'], 2, ['get', 'sel'], 1.6, 1]];
+
+mapa.on('load', () => {
+  const primeiroRotulo = mapa.getStyle().layers.find(l => l.type === 'symbol')?.id;
+
+  mapa.addSource('satelite', {
+    type: 'raster', tileSize: 256, maxzoom: 19,
+    tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+    attribution: 'Imagens © Esri, Maxar, Earthstar Geographics'
+  });
+  mapa.addLayer({ id: 'satelite', type: 'raster', source: 'satelite', layout: { visibility: 'none' } }, primeiroRotulo);
+
+  // Prédios reais do OpenStreetMap em 3D, já a partir do zoom da cidade.
+  if (mapa.getLayer('building-3d')) {
+    mapa.setLayerZoomRange('building-3d', 13, 24);
+    mapa.setPaintProperty('building-3d', 'fill-extrusion-color', '#e4ddd2');
+    mapa.setPaintProperty('building-3d', 'fill-extrusion-opacity', 0.88);
+  }
+
+  mapa.addSource('colunas', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  mapa.addSource('pinos', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  mapa.addLayer({
+    id: 'colunas', type: 'fill-extrusion', source: 'colunas',
+    paint: { 'fill-extrusion-color': ['get', 'cor'], 'fill-extrusion-height': ['get', 'altura'], 'fill-extrusion-opacity': 0.85 }
+  });
+  mapa.addLayer({
+    id: 'ondas', type: 'circle', source: 'pinos', filter: ['>', ['get', 'onda'], 0],
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'],
+        10, ['*', 10, ['-', 1.6, ['get', 'onda']]], 15, ['*', 26, ['-', 1.6, ['get', 'onda']]]],
+      'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': ['get', 'cor'], 'circle-stroke-width': 2.5,
+      'circle-stroke-opacity': ['get', 'onda']
+    }
+  });
+  mapa.addLayer({
+    id: 'pinos', type: 'circle', source: 'pinos',
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, ['*', 2.6, TAM], 13, ['*', 5, TAM], 16, ['*', 9, TAM]],
+      'circle-color': ['get', 'cor'], 'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10, 0.6, 14, 1.8]
+    }
+  });
+  mapa.addLayer({
+    id: 'showroom', type: 'symbol', source: 'pinos', filter: ['get', 'loja'],
+    layout: { 'text-field': 'Showroom Interiores', 'text-font': ['Noto Sans Bold'], 'text-size': 13, 'text-offset': [0, -1.6], 'text-allow-overlap': true },
+    paint: { 'text-color': '#7a4520', 'text-halo-color': '#ffffff', 'text-halo-width': 2 }
+  });
+
+  mapa.on('click', 'pinos', e => { if (!modoAdicionar) selecionar(pontos[e.features[0].properties.i]); });
+  mapa.on('mouseenter', 'pinos', () => { if (!modoAdicionar) mapa.getCanvas().style.cursor = 'pointer'; });
+  mapa.on('mouseleave', 'pinos', () => { if (!modoAdicionar) mapa.getCanvas().style.cursor = ''; });
+
+  iniciarAbertura();
+  requestAnimationFrame(quadro);
+});
+
+// ---------- Abertura: pinos pipocando e contador subindo ----------
+const aNum = document.getElementById('aNum'), caixaAbertura = document.getElementById('abertura');
+let relogio = 0, ultimoQuadro = null;
+function iniciarAbertura() {
+  fecharCartao();
+  abertura = { n: 0 };
+  aNum.textContent = 0;
+  caixaAbertura.hidden = false;
+  caixaAbertura.classList.remove('saindo');
+  const ordem = pontos.map((p, i) => [p, p.tipo === 'loja' ? -1 : ((i * 2654435761) % 1000) / 1000]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+  const duracao = calmo ? 0 : Math.min(7000, Math.max(2400, ordem.length * 220));
+  ordem.forEach((p, i) => { p.contado = false; p.nasce = relogio + 900 + (ordem.length > 1 ? duracao * Math.pow(i / (ordem.length - 1), 0.85) : 0); });
+  if (!clientes()) { caixaAbertura.hidden = true; abertura = null; }
+  mapa.jumpTo({ ...VISAO_GERAL, pitch: 0, bearing: 0 });
+  mapa.easeTo({ ...VISAO_CIDADE, duration: calmo ? 0 : duracao + 2200, delay: 300, essential: true });
+}
+function contar(novos) {
+  if (!abertura) return;
+  abertura.n += novos;
+  aNum.textContent = abertura.n;
+  document.getElementById('contador').textContent = abertura.n;
+  aNum.classList.remove('pulo'); void aNum.offsetWidth; aNum.classList.add('pulo');
+  if (abertura.n >= clientes()) {
+    abertura = null;
+    setTimeout(() => caixaAbertura.classList.add('saindo'), 1400);
+    setTimeout(() => { if (!abertura) caixaAbertura.hidden = true; }, 2000);
+  }
+}
+document.getElementById('btnAbertura').onclick = iniciarAbertura;
+mapa.getCanvas().addEventListener('pointerdown', () => { if (abertura) pontos.forEach(p => { if (!p.contado) p.nasce = relogio; }); });
+
+let animando = true;
+function quadro(tReal) {
+  // relógio próprio: em aparelhos lentos a animação desacelera em vez de pular etapas
+  relogio += Math.min(tReal - (ultimoQuadro ?? tReal), 100);
+  ultimoQuadro = tReal;
+  let novos = 0, emAndamento = false;
+  pontos.forEach(p => {
+    if (relogio >= p.nasce && !p.contado) { p.contado = true; if (p.tipo !== 'loja') novos++; }
+    if (relogio < p.nasce + 600) emAndamento = true;
+  });
+  if (novos) contar(novos);
+  if (emAndamento || animando) atualizarFontes(relogio);
+  animando = emAndamento;
+  requestAnimationFrame(quadro);
+}
+
+// ---------- Painel ----------
+function renderizar() {
+  const antigos = new Map(pontos.map(p => [p.coord.join() + p.nome, p]));
+  pontos = visiveis().map(p => ({ ...p, nasce: antigos.get(p.coord.join() + p.nome)?.nasce ?? 0, contado: true }));
+  if (abertura) { abertura = null; caixaAbertura.hidden = true; pontos.forEach(p => p.nasce = 0); }
+  const lista = document.getElementById('lista');
+  lista.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  pontos.forEach(p => {
+    const li = document.createElement('li');
+    li.tabIndex = 0;
+    li.innerHTML = `<i style="background:${TIPOS[p.tipo].cor}"></i><div><b></b><small></small></div>`;
+    li.querySelector('b').textContent = p.nome;
+    li.querySelector('small').textContent = `${p.bairro || 'Maceió'} · ${TIPOS[p.tipo].nome}`;
+    li.onclick = () => selecionar(p);
+    li.onkeydown = e => { if (e.key === 'Enter') selecionar(p); };
+    p.li = li;
+    if (p.extra) {
+      const b = document.createElement('button');
+      b.className = 'apagar';
+      b.setAttribute('aria-label', 'Remover ponto');
+      b.textContent = '×';
+      b.onclick = e => { e.stopPropagation(); extras = extras.filter(x => x.id !== p.id); salvarExtras(); renderizar(); };
+      li.appendChild(b);
+    }
+    frag.appendChild(li);
+  });
+  lista.appendChild(frag);
+  document.getElementById('contador').textContent = clientes();
+  animando = true;
+}
+
+function montarFiltros() {
+  const caixa = document.getElementById('filtros'), sel = document.getElementById('fTipo');
+  Object.entries(TIPOS).forEach(([k, t]) => {
+    const b = document.createElement('button');
+    b.className = 'filtro';
+    b.setAttribute('aria-pressed', 'true');
+    b.innerHTML = `<i style="background:${t.cor}"></i>${t.nome}`;
+    b.onclick = () => { ativos.has(k) ? ativos.delete(k) : ativos.add(k); b.setAttribute('aria-pressed', ativos.has(k)); renderizar(); };
+    caixa.appendChild(b);
+    sel.add(new Option(t.nome, k));
+  });
+}
+
+const cartao = document.getElementById('cartao');
+function selecionar(p) {
+  if (!p) return;
+  selecionado = p;
+  animando = true;
+  mapa.flyTo({ center: p.coord, zoom: 16.6, pitch: 62, bearing: mapa.getBearing() + 25, speed: 0.9, essential: true });
+  document.getElementById('cNome').textContent = p.nome;
+  document.getElementById('cBairro').textContent = `${p.bairro ? p.bairro + ', ' : ''}Maceió – AL`;
+  document.getElementById('cDesc').textContent = p.descricao || '';
+  const et = document.getElementById('cTipo');
+  et.textContent = TIPOS[p.tipo].nome;
+  et.style.background = TIPOS[p.tipo].cor;
+  document.getElementById('cGoogle').href = `https://www.google.com/maps/search/?api=1&query=${p.coord[1]},${p.coord[0]}`;
+  cartao.hidden = false;
+  pontos.forEach(x => x.li?.classList.toggle('ativo', x === p));
+  p.li?.scrollIntoView({ block: 'nearest' });
+}
+function fecharCartao() { cartao.hidden = true; selecionado = null; animando = true; }
+document.getElementById('fecharCartao').onclick = fecharCartao;
+
+// ---------- Ações ----------
+document.getElementById('btnVisao').onclick = () => { fecharCartao(); mapa.flyTo({ ...VISAO_CIDADE, speed: 0.8 }); };
+document.getElementById('btnSatelite').onclick = e => {
+  const ligado = mapa.getLayoutProperty('satelite', 'visibility') === 'visible';
+  mapa.setLayoutProperty('satelite', 'visibility', ligado ? 'none' : 'visible');
+  e.currentTarget.classList.toggle('ligado', !ligado);
+};
+
+let tour = false;
+document.getElementById('btnTour').onclick = async e => {
+  const b = e.currentTarget;
+  if (tour) { tour = false; return; }
+  tour = true;
+  b.classList.add('ligado');
+  b.textContent = 'Parar tour';
+  // showroom + um cliente de cada bairro
+  const vistos = new Set(), roteiro = pontos.filter(p => !vistos.has(p.bairro) && vistos.add(p.bairro));
+  for (let i = 0; i < roteiro.length && tour; i++) {
+    selecionar(roteiro[i]);
+    await new Promise(r => setTimeout(r, 4500));
+  }
+  tour = false;
+  b.classList.remove('ligado');
+  b.textContent = 'Tour pela cidade';
+  document.getElementById('btnVisao').click();
+};
+
+let modoAdicionar = false, novaCoord = null;
+function alternarAdicionar(ligar) {
+  modoAdicionar = ligar;
+  document.getElementById('btnAdicionar').classList.toggle('ligado', ligar);
+  document.getElementById('aviso').hidden = !ligar;
+  document.getElementById('form').hidden = true;
+  mapa.getCanvas().style.cursor = ligar ? 'crosshair' : '';
+}
+document.getElementById('btnAdicionar').onclick = () => alternarAdicionar(!modoAdicionar);
+document.getElementById('fCancelar').onclick = () => alternarAdicionar(false);
+mapa.on('click', e => {
+  if (!modoAdicionar) return;
+  novaCoord = [+e.lngLat.lng.toFixed(5), +e.lngLat.lat.toFixed(5)];
+  document.getElementById('aviso').hidden = true;
+  document.getElementById('form').hidden = false;
+  document.getElementById('painel').classList.remove('recolhido');
+  document.getElementById('fNome').focus();
+});
+document.getElementById('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const tipo = document.getElementById('fTipo').value;
+  extras.push({ id: Date.now(), nome: document.getElementById('fNome').value.trim(), bairro: document.getElementById('fBairro').value.trim(), tipo, coord: novaCoord });
+  salvarExtras();
+  ativos.add(tipo);
+  e.target.reset();
+  alternarAdicionar(false);
+  renderizar();
+  selecionar(pontos[pontos.length - 1]);
+});
+
+document.getElementById('btnExportar').onclick = () => {
+  const linhas = [['nome', 'bairro', 'tipo', 'latitude', 'longitude', 'descricao'],
+    ...todos().map(p => [p.nome, p.bairro || '', TIPOS[p.tipo].nome, p.coord[1], p.coord[0], p.descricao || ''])];
+  const csv = linhas.map(l => l.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' }));
+  a.download = 'clientes-interiores.csv';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+document.getElementById('recolher').onclick = e => {
+  const p = document.getElementById('painel');
+  p.classList.toggle('recolhido');
+  e.currentTarget.textContent = p.classList.contains('recolhido') ? '▴' : '▾';
+};
+
+montarFiltros();
+renderizar();
+if (innerWidth <= 640) { document.getElementById('painel').classList.add('recolhido'); document.getElementById('recolher').textContent = '▴'; }
+</script>
+</body>
+</html>

@@ -1,0 +1,660 @@
+<title>Interiores Móveis Planejados</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+  /* Layout: cena 3D ocupando a tela, painel flutuante à esquerda (folha inferior no celular). */
+  :root {
+    --bg: #cfe3ee;
+    --painel: rgba(255, 252, 247, .94);
+    --texto: #1f2a33;
+    --suave: #5d6b76;
+    --borda: rgba(31, 42, 51, .12);
+    --hover: rgba(31, 42, 51, .06);
+    --madeira: #9a5b2e;
+    --madeira-texto: #fff8f0;
+    --rotulo: rgba(255, 255, 255, .92);
+    --rotulo-texto: #2a3640;
+    --fonte-titulo: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --fonte: "Figtree", "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1a22; --painel: rgba(20, 29, 36, .93); --texto: #eef2f4; --suave: #9fb0bb;
+      --borda: rgba(255, 255, 255, .1); --hover: rgba(255, 255, 255, .07);
+      --madeira: #d08a52; --madeira-texto: #1d130b; --rotulo: rgba(20, 29, 36, .85); --rotulo-texto: #e6edf1;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1a22; --painel: rgba(20, 29, 36, .93); --texto: #eef2f4; --suave: #9fb0bb;
+    --borda: rgba(255, 255, 255, .1); --hover: rgba(255, 255, 255, .07);
+    --madeira: #d08a52; --madeira-texto: #1d130b; --rotulo: rgba(20, 29, 36, .85); --rotulo-texto: #e6edf1;
+    color-scheme: dark;
+  }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; overflow: hidden; }
+  body { background: var(--bg); color: var(--texto); font-family: var(--fonte); font-size: 14px; }
+  #cena { position: fixed; inset: 0; }
+  #cena canvas { display: block; touch-action: none; }
+  #rotulos { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  .rotulo { position: absolute; left: 0; top: 0; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+    background: var(--rotulo); color: var(--rotulo-texto); font-size: 11.5px; font-weight: 600;
+    letter-spacing: .02em; box-shadow: 0 1px 4px rgba(0, 0, 0, .15); will-change: transform; }
+
+  #painel { position: fixed; z-index: 2; top: calc(12px + env(safe-area-inset-top, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px)); width: 330px;
+    max-height: calc(100% - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    display: flex; flex-direction: column; background: var(--painel); border: 1px solid var(--borda);
+    border-radius: 16px; backdrop-filter: blur(10px); box-shadow: 0 12px 34px rgba(0, 0, 0, .18); }
+  #painel header { display: flex; gap: 10px; align-items: flex-start; padding: 16px 16px 12px; border-bottom: 1px solid var(--borda); }
+  #painel h1 { margin: 0; font: 700 19px/1.15 var(--fonte-titulo); text-wrap: balance; }
+  #painel header p { margin: 4px 0 0; color: var(--suave); font-size: 13px; }
+  #contador { color: var(--madeira); font-weight: 700; font-variant-numeric: tabular-nums; }
+  #recolher { margin-left: auto; flex: none; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--borda);
+    background: transparent; color: var(--texto); cursor: pointer; font-size: 14px; }
+
+  .filtros { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--borda); }
+  .filtro { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--borda); background: transparent; color: var(--texto); cursor: pointer; font: 500 12px var(--fonte); }
+  .filtro i { width: 9px; height: 9px; border-radius: 50%; }
+  .filtro[aria-pressed="false"] { opacity: .4; text-decoration: line-through; }
+
+  #lista { list-style: none; margin: 0; padding: 6px; overflow-y: auto; flex: 1; min-height: 60px; }
+  #lista li { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; cursor: pointer; }
+  #lista li:hover, #lista li.ativo { background: var(--hover); }
+  #lista li > i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  #lista li > div { min-width: 0; }
+  #lista b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #lista small { color: var(--suave); }
+  #lista .apagar { margin-left: auto; flex: none; background: none; border: 0; color: var(--suave); cursor: pointer; font-size: 18px; }
+
+  .acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 12px 16px 16px; border-top: 1px solid var(--borda); }
+  .acoes button, #form button { padding: 9px 8px; border-radius: 9px; border: 1px solid var(--borda); background: var(--hover);
+    color: var(--texto); cursor: pointer; font: 600 12.5px var(--fonte); }
+  .acoes button:hover { filter: brightness(1.05); border-color: var(--suave); }
+  .acoes button.ligado, #form .salvar { background: var(--madeira); color: var(--madeira-texto); border-color: transparent; }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--madeira); outline-offset: 2px; }
+
+  #form { display: grid; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--borda); }
+  #form label { display: grid; gap: 3px; font-size: 12px; color: var(--suave); }
+  #form input, #form select { padding: 8px; border-radius: 8px; border: 1px solid var(--borda); background: transparent;
+    color: var(--texto); font: 14px var(--fonte); }
+  #form .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  #copia { margin: 0 16px 12px; height: 90px; font: 11px ui-monospace, monospace; background: transparent; color: var(--texto);
+    border: 1px solid var(--borda); border-radius: 8px; }
+
+  #abertura { position: fixed; z-index: 3; left: 50%; top: calc(9% + env(safe-area-inset-top, 0px)); transform: translateX(-50%);
+    display: grid; justify-items: center; gap: 2px; padding: 14px 26px 16px; border-radius: 20px; text-align: center;
+    background: var(--painel); border: 1px solid var(--borda); box-shadow: 0 14px 40px rgba(0, 0, 0, .2);
+    backdrop-filter: blur(10px); pointer-events: none; transition: opacity .6s, transform .6s; }
+  #abertura strong { font: 700 clamp(48px, 9vw, 84px)/1 var(--fonte-titulo); color: var(--madeira); font-variant-numeric: tabular-nums; }
+  #abertura span { color: var(--suave); font-weight: 500; max-width: 26ch; text-wrap: balance; }
+  #abertura.saindo { opacity: 0; transform: translateX(-50%) translateY(-14px); }
+  #abertura .pulo { animation: pulo .3s ease-out; }
+  @keyframes pulo { from { transform: scale(1.18); } to { transform: scale(1); } }
+  #aviso { position: fixed; z-index: 3; top: calc(14px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%);
+    padding: 8px 16px; background: var(--madeira); color: var(--madeira-texto); border-radius: 999px; font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .2); }
+
+  #cartao { position: fixed; z-index: 2; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: 290px; padding: 14px 16px; background: var(--painel); border: 1px solid var(--borda); border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .18); backdrop-filter: blur(10px); }
+  #cartao h2 { margin: 0 0 2px; font: 700 17px var(--fonte-titulo); }
+  #cartao p { margin: 2px 0; color: var(--suave); }
+  #cartao .etiqueta { display: inline-block; margin: 8px 0 10px; padding: 3px 9px; border-radius: 999px; color: #fff; font-size: 11.5px; font-weight: 600; }
+  #cartao a { display: block; color: var(--madeira); font-weight: 600; text-decoration: none; }
+  #cartao a:hover { text-decoration: underline; }
+  #fecharCartao { position: absolute; top: 8px; right: 10px; background: none; border: 0; color: var(--suave); cursor: pointer; font-size: 18px; }
+  #ajuda { position: fixed; z-index: 1; right: max(12px, env(safe-area-inset-right, 0px)); top: calc(12px + env(safe-area-inset-top, 0px));
+    padding: 6px 10px; border-radius: 8px; background: var(--painel); color: var(--suave); font-size: 12px; }
+
+  #painel.recolhido #lista, #painel.recolhido .filtros, #painel.recolhido .acoes, #painel.recolhido #form, #painel.recolhido #copia { display: none; }
+
+  @media (max-width: 640px) {
+    #painel { top: auto; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); left: max(8px, env(safe-area-inset-left, 0px));
+      right: max(8px, env(safe-area-inset-right, 0px)); width: auto; max-height: 52%; }
+    #cartao { left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); width: auto;
+      top: calc(8px + env(safe-area-inset-top, 0px)); bottom: auto; }
+    #ajuda { display: none; }
+  }
+</style>
+
+<div id="cena"></div>
+<div id="rotulos"></div>
+<div id="abertura" aria-live="polite"><strong id="aNum">0</strong><span>clientes com móveis planejados em Maceió</span></div>
+<div id="aviso" hidden>Toque no mapa onde o móvel foi instalado</div>
+<div id="ajuda">Arraste para girar · botão direito ou dois dedos para mover · roda para zoom</div>
+
+<aside id="painel">
+  <header>
+    <div>
+      <h1>Interiores Móveis Planejados</h1>
+      <p><span id="contador">0</span> clientes em Maceió · simulação</p>
+    </div>
+    <button id="recolher" aria-label="Recolher painel">▾</button>
+  </header>
+  <div class="filtros" id="filtros"></div>
+  <ul id="lista"></ul>
+  <form id="form" hidden>
+    <label>Nome do ambiente<input id="fNome" required placeholder="Cozinha da família Silva"></label>
+    <div class="linha">
+      <label>Bairro<input id="fBairro" placeholder="Ponta Verde"></label>
+      <label>Tipo<select id="fTipo"></select></label>
+    </div>
+    <div class="linha">
+      <button type="button" id="fCancelar">Cancelar</button>
+      <button type="submit" class="salvar">Salvar ponto</button>
+    </div>
+  </form>
+  <textarea id="copia" hidden readonly aria-label="Lista de pontos"></textarea>
+  <div class="acoes">
+    <button id="btnTour">Tour pela cidade</button>
+    <button id="btnVisao">Ver a cidade toda</button>
+    <button id="btnAdicionar">Adicionar ponto</button>
+    <button id="btnCopiar">Copiar lista</button>
+    <button id="btnAbertura" style="grid-column: 1 / -1">Rever abertura</button>
+  </div>
+</aside>
+
+<div id="cartao" hidden>
+  <button id="fecharCartao" aria-label="Fechar">×</button>
+  <h2 id="cNome"></h2>
+  <p id="cBairro"></p>
+  <p id="cDesc"></p>
+  <span class="etiqueta" id="cTipo"></span>
+  <a id="cGoogle" href="#" target="_blank" rel="noopener">Abrir no Google Maps ↗</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// ---------- Dados ----------
+// Contorno do município de Maceió (IBGE, via github.com/tbrugz/geodata-br), [longitude, latitude].
+const CONTORNO = [[-35.6173,-9.46925],[-35.59838,-9.47263],[-35.58977,-9.46869],[-35.57978,-9.47097],[-35.56896,-9.47742],[-35.56207,-9.47933],[-35.5582,-9.48703],[-35.58652,-9.51025],[-35.59091,-9.52859],[-35.59521,-9.52998],[-35.60491,-9.53107],[-35.61378,-9.53965],[-35.61619,-9.54787],[-35.63011,-9.55158],[-35.64641,-9.56741],[-35.64963,-9.56711],[-35.65938,-9.58326],[-35.68641,-9.61351],[-35.69723,-9.63947],[-35.69902,-9.64914],[-35.6945,-9.66436],[-35.70857,-9.66502],[-35.72373,-9.68422],[-35.72899,-9.68227],[-35.72299,-9.68172],[-35.72246,-9.67575],[-35.72948,-9.67093],[-35.74105,-9.67154],[-35.75524,-9.67772],[-35.78802,-9.71081],[-35.79417,-9.71271],[-35.79585,-9.70778],[-35.78216,-9.69728],[-35.79083,-9.68015],[-35.78519,-9.66909],[-35.77991,-9.66649],[-35.77996,-9.65527],[-35.76931,-9.63479],[-35.76962,-9.63419],[-35.78208,-9.62191],[-35.79336,-9.59983],[-35.81552,-9.57667],[-35.80946,-9.56846],[-35.79618,-9.53106],[-35.78403,-9.50621],[-35.78374,-9.50393],[-35.77983,-9.47285],[-35.7693,-9.38936],[-35.74582,-9.3838],[-35.68736,-9.37042],[-35.67646,-9.39802],[-35.67199,-9.40935],[-35.66472,-9.42975],[-35.64155,-9.44393],[-35.62547,-9.44754],[-35.62477,-9.46087]];
+const ORLA = [6, 31]; // trecho do contorno voltado para o mar (índices)
+
+// [nome, longitude, latitude, peso na simulação de clientes]
+const BAIRROS = [
+  ['Ponta Verde', -35.7035, -9.6600, 60], ['Pajuçara', -35.7175, -9.6700, 40], ['Jatiúca', -35.7080, -9.6460, 70],
+  ['Cruz das Almas', -35.7010, -9.6300, 40], ['Jacarecica', -35.6960, -9.6150, 20], ['Garça Torta', -35.6800, -9.6000, 12],
+  ['Guaxuma', -35.6700, -9.5860, 15], ['Riacho Doce', -35.6560, -9.5650, 10], ['Ipioca', -35.6100, -9.5180, 8],
+  ['Centro', -35.7350, -9.6650, 20], ['Farol', -35.7400, -9.6500, 45], ['Trapiche', -35.7520, -9.6700, 15],
+  ['Pontal da Barra', -35.7770, -9.6930, 10], ['Bebedouro', -35.7630, -9.6230, 15], ['Serraria', -35.7270, -9.5900, 40],
+  ['Tabuleiro', -35.7520, -9.5750, 35], ['Cidade Universitária', -35.7700, -9.5500, 25], ['Benedito Bentes', -35.7150, -9.5520, 35],
+  ['Gruta de Lourdes', -35.7370, -9.6320, 30], ['Mangabeiras', -35.7180, -9.6430, 25], ['Poço', -35.7270, -9.6590, 20],
+  ['Antares', -35.7450, -9.5920, 15]
+];
+
+const TIPOS = {
+  cozinha:    { nome: 'Cozinha',         cor: '#e8833a' },
+  dormitorio: { nome: 'Dormitório',      cor: '#7b6cf6' },
+  sala:       { nome: 'Sala',            cor: '#1fa58f' },
+  escritorio: { nome: 'Escritório',      cor: '#3a86e8' },
+  banheiro:   { nome: 'Banheiro',        cor: '#e2507f' },
+  loja:       { nome: 'Loja / Showroom', cor: '#e0a800' }
+};
+
+// Showroom + clientes SIMULADOS (gerados mais abaixo) — troque pelos endereços reais.
+const PONTOS = [
+  { nome: 'Showroom', bairro: 'Ponta Verde', tipo: 'loja', coord: [-35.7045, -9.6590], descricao: 'Loja principal' }
+];
+const TOTAL_SIMULADOS = 527;
+
+// ---------- Projeção: 1 unidade = 100 m ----------
+const LNG0 = -35.70, LAT0 = -9.58;
+const KX = 111.32 * Math.cos(LAT0 * Math.PI / 180) * 10, KZ = 110.57 * 10;
+const paraCena = (lng, lat) => new THREE.Vector3((lng - LNG0) * KX, 0, -(lat - LAT0) * KZ);
+const deCena = v => [LNG0 + v.x / KX, LAT0 - v.z / KZ];
+const CONT = CONTORNO.map(([a, b]) => [(a - LNG0) * KX, -(b - LAT0) * KZ]);
+
+function dentro(x, z) {
+  let d = false;
+  for (let i = 0, j = CONT.length - 1; i < CONT.length; j = i++) {
+    const [xi, zi] = CONT[i], [xj, zj] = CONT[j];
+    if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) d = !d;
+  }
+  return d;
+}
+function distOrla(x, z) {
+  let m = Infinity;
+  for (let i = ORLA[0]; i < ORLA[1]; i++) {
+    const [ax, az] = CONT[i], [bx, bz] = CONT[i + 1];
+    const dx = bx - ax, dz = bz - az;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)));
+    m = Math.min(m, Math.hypot(x - ax - t * dx, z - az - t * dz));
+  }
+  return m;
+}
+function semente(s) { return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// Clientes simulados espalhados pelos bairros, mais concentrados onde há mais peso.
+(function simularClientes() {
+  const r = semente(527);
+  const somaPesos = BAIRROS.reduce((s, b) => s + b[3], 0);
+  const tipos = [['cozinha', 38], ['dormitorio', 27], ['sala', 15], ['escritorio', 9], ['banheiro', 11]];
+  const sortear = (lista, total) => { let x = r() * total; return lista.find(item => (x -= item[item.length - 1]) < 0) || lista[0]; };
+  const gauss = () => Math.sqrt(-2 * Math.log(r() || 1e-9)) * Math.cos(2 * Math.PI * r());
+  for (let n = 1; PONTOS.length <= TOTAL_SIMULADOS; n++) {
+    const b = sortear(BAIRROS, somaPesos);
+    const c = paraCena(b[1], b[2]);
+    const x = c.x + gauss() * 4.5, z = c.z + gauss() * 4.5;
+    if (!dentro(x, z) || distOrla(x, z) < 1) continue;
+    const tipo = sortear(tipos, 100)[0];
+    const num = String(PONTOS.length).padStart(3, '0');
+    const [lng, lat] = deCena({ x, z });
+    PONTOS.push({ nome: `Cliente ${num} · ${TIPOS[tipo].nome}`, bairro: b[0], tipo, coord: [+lng.toFixed(5), +lat.toFixed(5)],
+      descricao: `Instalado em ${2016 + Math.floor(r() * 11)} · cliente simulado` });
+  }
+})();
+
+// ---------- Cena ----------
+const alvo = document.getElementById('cena');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+alvo.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const CEU = new THREE.Color('#bcdcef');
+scene.background = CEU;
+scene.fog = new THREE.Fog(CEU, 180, 520);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.5, 2000);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.maxPolarAngle = 1.38;
+controls.minDistance = 4;
+controls.maxDistance = 420;
+controls.screenSpacePanning = false;
+
+scene.add(new THREE.HemisphereLight('#e9f4ff', '#c8b48a', 0.75));
+const sol = new THREE.DirectionalLight('#fff2dc', 0.85);
+sol.position.set(80, 140, 60);
+sol.castShadow = true;
+sol.shadow.mapSize.set(2048, 2048);
+Object.assign(sol.shadow.camera, { left: -120, right: 120, top: 120, bottom: -120, near: 10, far: 400 });
+scene.add(sol, sol.target);
+
+// Mar e lagoa
+const mar = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), new THREE.MeshStandardMaterial({ color: '#4f9fc4', roughness: 0.35, metalness: 0.1 }));
+mar.rotation.x = -Math.PI / 2;
+mar.position.y = -0.02;
+mar.receiveShadow = true;
+scene.add(mar);
+
+// Terra
+const forma = new THREE.Shape(CONT.map(([x, z]) => new THREE.Vector2(x, -z)));
+const terraGeo = new THREE.ExtrudeGeometry(forma, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.35, bevelSegments: 2 });
+terraGeo.rotateX(-Math.PI / 2);
+const terra = new THREE.Mesh(terraGeo, new THREE.MeshStandardMaterial({ color: '#86a56c', roughness: 0.95 }));
+terra.receiveShadow = true;
+scene.add(terra);
+const TOPO = 0.18;
+
+// Areia da orla
+const areiaMat = new THREE.MeshStandardMaterial({ color: '#f1dfb3', roughness: 1 });
+for (let i = ORLA[0]; i < ORLA[1]; i++) {
+  const a = new THREE.Vector3(CONT[i][0], 0, CONT[i][1]), b = new THREE.Vector3(CONT[i + 1][0], 0, CONT[i + 1][1]);
+  const len = a.distanceTo(b);
+  const faixa = new THREE.Mesh(new THREE.BoxGeometry(len + 0.5, 0.2, 0.9), areiaMat);
+  faixa.position.copy(a.clone().add(b).multiplyScalar(0.5)).setY(0.05);
+  faixa.rotation.y = -Math.atan2(b.z - a.z, b.x - a.x);
+  faixa.receiveShadow = true;
+  scene.add(faixa);
+}
+
+// Prédios e árvores gerados dentro do contorno real
+const aleat = semente(2704302);
+const predios = [], arvores = [];
+const [minX, maxX] = [Math.min(...CONT.map(p => p[0])), Math.max(...CONT.map(p => p[0]))];
+const [minZ, maxZ] = [Math.min(...CONT.map(p => p[1])), Math.max(...CONT.map(p => p[1]))];
+for (let n = 0; n < 170000; n++) {
+  const x = minX + aleat() * (maxX - minX), z = minZ + aleat() * (maxZ - minZ);
+  if (!dentro(x, z)) continue;
+  const d = distOrla(x, z);
+  if (d < 0.9) continue;
+  const lat = LAT0 - z / KZ, lng = LNG0 + x / KX;
+  let dens = lat < -9.585 ? (d < 25 ? 0.75 : 0.5) : lat < -9.52 ? (d < 15 ? 0.2 : 0.06) : (d < 10 ? 0.06 : 0.012);
+  if (lat < -9.585 && lng < -35.775) dens *= 0.4;
+  if (aleat() > dens) { if (aleat() < 0.12) arvores.push([x, z]); continue; }
+  let h = 0.04 + aleat() * 0.09;
+  const orlaNobre = lat < -9.605 && lat > -9.675 && d < 9 && lng > -35.725;
+  if (orlaNobre && aleat() < 0.55) h = 0.35 + aleat() * aleat() * 1.1;
+  else if (lat < -9.6 && lng < -35.73 && lng > -35.75 && aleat() < 0.18) h = 0.2 + aleat() * 0.35;
+  else if (lat < -9.54 && aleat() < 0.05) h = 0.15 + aleat() * 0.25;
+  const w = h > 0.3 ? 0.18 + aleat() * 0.14 : 0.1 + aleat() * 0.16;
+  predios.push([x, z, w, w * (0.7 + aleat() * 0.6), h, aleat()]);
+}
+const tons = ['#f4efe6', '#e9e2d4', '#dfe5e8', '#f1e3cf', '#d7dde3', '#efe9df'].map(c => new THREE.Color(c));
+const predioMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ roughness: 0.7 }), predios.length);
+const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), eixoY = new THREE.Vector3(0, 1, 0);
+predios.forEach(([x, z, w, p, h, r], i) => {
+  q.setFromAxisAngle(eixoY, r * 0.5 - 0.25 + 0.6);
+  m4.compose(new THREE.Vector3(x, TOPO + h / 2, z), q, new THREE.Vector3(w, h, p));
+  predioMesh.setMatrixAt(i, m4);
+  predioMesh.setColorAt(i, tons[i % tons.length]);
+});
+predioMesh.castShadow = predioMesh.receiveShadow = true;
+scene.add(predioMesh);
+
+const arvoreMesh = new THREE.InstancedMesh(new THREE.ConeGeometry(0.12, 0.3, 6), new THREE.MeshStandardMaterial({ color: '#5f9a4e', roughness: 1 }), arvores.length);
+arvores.forEach(([x, z], i) => { m4.compose(new THREE.Vector3(x, TOPO + 0.15, z), new THREE.Quaternion(), new THREE.Vector3(1, 0.7 + (i % 5) * 0.12, 1)); arvoreMesh.setMatrixAt(i, m4); });
+arvoreMesh.castShadow = true;
+scene.add(arvoreMesh);
+
+// ---------- Rótulos dos bairros ----------
+const camadaRotulos = document.getElementById('rotulos');
+const rotulos = BAIRROS.map(([nome, lng, lat]) => {
+  const el = document.createElement('div');
+  el.className = 'rotulo';
+  el.textContent = nome;
+  camadaRotulos.appendChild(el);
+  return { el, pos: paraCena(lng, lat).setY(1.6) };
+});
+
+// ---------- Pinos ----------
+let abertura = null;
+const CHAVE = 'mapa-maceio-pontos-extras';
+const lerExtras = () => { try { return JSON.parse(localStorage.getItem(CHAVE)) || []; } catch { return []; } };
+const salvarExtras = () => { try { localStorage.setItem(CHAVE, JSON.stringify(extras)); } catch {} };
+let extras = lerExtras();
+const ativos = new Set(Object.keys(TIPOS));
+const todos = () => [...PONTOS, ...extras.map(p => ({ ...p, extra: true }))];
+const visiveis = () => todos().filter(p => ativos.has(p.tipo));
+const clientes = () => visiveis().filter(p => p.tipo !== 'loja').length;
+
+const grupoPinos = new THREE.Group();
+scene.add(grupoPinos);
+let pinos = [];
+
+// Geometrias e materiais compartilhados: centenas de pinos sem pesar.
+const GEO = {
+  feixe: new THREE.CylinderGeometry(0.05, 0.05, 3, 6, 1, true).translate(0, 1.5, 0),
+  cabeca: new THREE.SphereGeometry(0.28, 14, 10).translate(0, 3.2, 0),
+  anel: new THREE.RingGeometry(0.35, 0.5, 24).rotateX(-Math.PI / 2).translate(0, 0.05, 0),
+  toque: new THREE.CylinderGeometry(0.5, 0.5, 3.6, 6).translate(0, 1.8, 0)
+};
+const MAT = Object.fromEntries(Object.entries(TIPOS).map(([k, t]) => {
+  const cor = new THREE.Color(t.cor);
+  return [k, {
+    feixe: new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: 0.45, depthWrite: false }),
+    cabeca: new THREE.MeshStandardMaterial({ color: cor, emissive: cor, emissiveIntensity: 0.45, roughness: 0.4 }),
+    anel: new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false })
+  }];
+}));
+const MAT_TOQUE = new THREE.MeshBasicMaterial({ visible: false });
+
+function criarPino(p) {
+  const m = MAT[p.tipo];
+  const g = new THREE.Group();
+  g.position.copy(paraCena(...p.coord)).setY(TOPO);
+  const anel = new THREE.Mesh(GEO.anel, m.anel);
+  const toque = new THREE.Mesh(GEO.toque, MAT_TOQUE);
+  g.add(new THREE.Mesh(GEO.feixe, m.feixe), new THREE.Mesh(GEO.cabeca, m.cabeca), anel, toque);
+  g.userData = { ponto: p, anel, toque };
+  toque.userData.grupo = g;
+  return g;
+}
+
+function renderizar() {
+  if (abertura) { abertura = null; caixaAbertura.hidden = true; }
+  pinos.forEach(g => grupoPinos.remove(g));
+  pinos = visiveis().map(criarPino);
+  pinos.forEach(g => { g.userData.nasce = 0; grupoPinos.add(g); });
+
+  const lista = document.getElementById('lista');
+  lista.innerHTML = '';
+  visiveis().forEach((p, i) => {
+    const li = document.createElement('li');
+    li.tabIndex = 0;
+    li.innerHTML = `<i style="background:${TIPOS[p.tipo].cor}"></i><div><b></b><small></small></div>`;
+    li.querySelector('b').textContent = p.nome;
+    li.querySelector('small').textContent = `${p.bairro || 'Maceió'} · ${TIPOS[p.tipo].nome}`;
+    li.onclick = () => selecionar(pinos[i]);
+    li.onkeydown = e => { if (e.key === 'Enter') selecionar(pinos[i]); };
+    if (p.extra) {
+      const b = document.createElement('button');
+      b.className = 'apagar';
+      b.setAttribute('aria-label', 'Remover ponto');
+      b.textContent = '×';
+      b.onclick = e => { e.stopPropagation(); extras = extras.filter(x => x.id !== p.id); salvarExtras(); renderizar(); };
+      li.appendChild(b);
+    }
+    lista.appendChild(li);
+  });
+  if (!abertura) document.getElementById('contador').textContent = clientes();
+}
+
+function montarFiltros() {
+  const caixa = document.getElementById('filtros');
+  const sel = document.getElementById('fTipo');
+  Object.entries(TIPOS).forEach(([k, t]) => {
+    const b = document.createElement('button');
+    b.className = 'filtro';
+    b.setAttribute('aria-pressed', 'true');
+    b.innerHTML = `<i style="background:${t.cor}"></i>${t.nome}`;
+    b.onclick = () => {
+      ativos.has(k) ? ativos.delete(k) : ativos.add(k);
+      b.setAttribute('aria-pressed', ativos.has(k));
+      renderizar();
+    };
+    caixa.appendChild(b);
+    sel.add(new Option(t.nome, k));
+  });
+}
+
+// ---------- Câmera ----------
+let voo = null;
+function voarPara(destAlvo, destCam, ms = 1600) {
+  voo = { t0: relogio, ms, a0: controls.target.clone(), c0: camera.position.clone(), a1: destAlvo, c1: destCam };
+}
+const visaoGeral = () => voarPara(new THREE.Vector3(-2, 0, 6), new THREE.Vector3(70, 150, 190));
+const visaoCidade = () => voarPara(paraCena(-35.725, -9.635), paraCena(-35.665, -9.70).setY(38));
+
+const cartao = document.getElementById('cartao');
+let selecionado = null;
+function selecionar(g) {
+  if (!g) return;
+  selecionado = g;
+  const p = g.userData.ponto;
+  const alvoP = g.position.clone().setY(0.5);
+  const dir = camera.position.clone().sub(controls.target).setY(0).normalize();
+  if (!isFinite(dir.x)) dir.set(0.6, 0, 0.8);
+  voarPara(alvoP, alvoP.clone().add(dir.multiplyScalar(14)).setY(9));
+  document.getElementById('cNome').textContent = p.nome;
+  document.getElementById('cBairro').textContent = `${p.bairro || ''}${p.bairro ? ', ' : ''}Maceió – AL`;
+  document.getElementById('cDesc').textContent = p.descricao || '';
+  const et = document.getElementById('cTipo');
+  et.textContent = TIPOS[p.tipo].nome;
+  et.style.background = TIPOS[p.tipo].cor;
+  document.getElementById('cGoogle').href = `https://www.google.com/maps/search/?api=1&query=${p.coord[1]},${p.coord[0]}`;
+  cartao.hidden = false;
+  [...document.querySelectorAll('#lista li')].forEach((li, i) => li.classList.toggle('ativo', pinos[i] === g));
+}
+document.getElementById('fecharCartao').onclick = () => { cartao.hidden = true; selecionado = null; };
+
+// ---------- Interação ----------
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let inicioToque = null, modoAdicionar = false, novaCoord = null;
+renderer.domElement.addEventListener('pointerdown', e => { inicioToque = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!inicioToque || Math.hypot(e.clientX - inicioToque[0], e.clientY - inicioToque[1]) > 6) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  mouse.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  if (modoAdicionar) {
+    const hit = ray.intersectObject(terra)[0];
+    if (!hit) return;
+    novaCoord = deCena(hit.point).map(v => +v.toFixed(5));
+    document.getElementById('aviso').hidden = true;
+    document.getElementById('form').hidden = false;
+    document.getElementById('fNome').focus();
+    return;
+  }
+  const hit = ray.intersectObjects(pinos.map(g => g.userData.toque))[0];
+  if (hit) selecionar(hit.object.userData.grupo);
+});
+
+function alternarAdicionar(ligar) {
+  modoAdicionar = ligar;
+  document.getElementById('btnAdicionar').classList.toggle('ligado', ligar);
+  document.getElementById('aviso').hidden = !ligar;
+  document.getElementById('form').hidden = true;
+  renderer.domElement.style.cursor = ligar ? 'crosshair' : '';
+}
+document.getElementById('btnAdicionar').onclick = () => alternarAdicionar(!modoAdicionar);
+document.getElementById('fCancelar').onclick = () => alternarAdicionar(false);
+document.getElementById('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const tipo = document.getElementById('fTipo').value;
+  extras.push({ id: Date.now(), nome: document.getElementById('fNome').value.trim(), bairro: document.getElementById('fBairro').value.trim(), tipo, coord: novaCoord });
+  salvarExtras();
+  ativos.add(tipo);
+  e.target.reset();
+  alternarAdicionar(false);
+  renderizar();
+  selecionar(pinos[pinos.length - 1]);
+});
+
+document.getElementById('btnCopiar').onclick = async e => {
+  const texto = JSON.stringify(todos().map(({ extra, id, ...p }) => p), null, 2);
+  const area = document.getElementById('copia');
+  try {
+    await navigator.clipboard.writeText(texto);
+    e.target.textContent = 'Lista copiada';
+    setTimeout(() => e.target.textContent = 'Copiar lista', 1800);
+  } catch {
+    area.value = texto;
+    area.hidden = false;
+    area.select();
+  }
+};
+
+let tour = false;
+document.getElementById('btnTour').onclick = async e => {
+  const b = e.target;
+  if (tour) { tour = false; return; }
+  tour = true;
+  b.classList.add('ligado');
+  b.textContent = 'Parar tour';
+  for (let i = 0; i < pinos.length && tour; i++) {
+    selecionar(pinos[i]);
+    await new Promise(r => setTimeout(r, 4200));
+  }
+  tour = false;
+  b.classList.remove('ligado');
+  b.textContent = 'Tour pela cidade';
+  visaoCidade();
+};
+document.getElementById('btnVisao').onclick = () => { cartao.hidden = true; visaoGeral(); };
+document.getElementById('recolher').onclick = e => {
+  const p = document.getElementById('painel');
+  p.classList.toggle('recolhido');
+  e.target.textContent = p.classList.contains('recolhido') ? '▴' : '▾';
+};
+
+// ---------- Abertura: pinos pipocando e contador subindo ----------
+const aNum = document.getElementById('aNum'), caixaAbertura = document.getElementById('abertura');
+function contar(novos) {
+  if (!abertura) return;
+  abertura.n += novos;
+  aNum.textContent = abertura.n;
+  document.getElementById('contador').textContent = abertura.n;
+  aNum.classList.remove('pulo'); void aNum.offsetWidth; aNum.classList.add('pulo');
+  if (abertura.n === clientes()) {
+    setTimeout(() => caixaAbertura.classList.add('saindo'), 1400);
+    setTimeout(() => { caixaAbertura.hidden = true; abertura = null; }, 2000);
+  }
+}
+function iniciarAbertura(t) {
+  cartao.hidden = true;
+  selecionado = null;
+  abertura = { n: 0 };
+  aNum.textContent = 0;
+  caixaAbertura.hidden = false;
+  caixaAbertura.classList.remove('saindo');
+  const ordem = pinos.map((g, i) => [g, g.userData.ponto.tipo === 'loja' ? -1 : semente(i * 7919 + 13)()]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+  const duracao = calmo ? 0 : Math.min(7000, Math.max(2400, pinos.length * 220));
+  ordem.forEach((g, i) => {
+    g.userData.contado = false;
+    g.userData.nasce = t + 700 + (ordem.length > 1 ? duracao * Math.pow(i / (ordem.length - 1), 0.85) : 0);
+  });
+  if (!clientes()) { caixaAbertura.hidden = true; abertura = null; return; }
+  camera.position.set(60, 190, 230);
+  controls.target.set(-6, 0, 10);
+  voo = null;
+  setTimeout(() => voarPara(paraCena(-35.725, -9.635), paraCena(-35.665, -9.70).setY(38), duracao + 1800), 200);
+}
+document.getElementById('btnAbertura').onclick = () => iniciarAbertura(relogio);
+renderer.domElement.addEventListener('pointerdown', () => {
+  if (!abertura) return;
+  pinos.forEach(g => { if (!g.userData.contado) g.userData.nasce = relogio; });
+});
+
+// ---------- Loop ----------
+function redimensionar() {
+  const w = alvo.clientWidth, h = alvo.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', redimensionar);
+redimensionar();
+
+let relogio = 0, ultimoQuadro = null;
+const calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const tmp = new THREE.Vector3();
+function quadro(tReal) {
+  // relógio próprio: em aparelhos lentos a animação desacelera em vez de pular quadros
+  relogio += Math.min(tReal - (ultimoQuadro ?? tReal), 100);
+  ultimoQuadro = tReal;
+  const t = relogio;
+  if (voo) {
+    let k = Math.min(1, (t - voo.t0) / voo.ms);
+    if (calmo) k = 1;
+    const s = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+    controls.target.lerpVectors(voo.a0, voo.a1, s);
+    camera.position.lerpVectors(voo.c0, voo.c1, s);
+    if (k === 1) voo = null;
+  }
+  controls.update();
+  sol.position.copy(controls.target).add(new THREE.Vector3(80, 140, 60));
+  sol.target.position.copy(controls.target);
+
+  const dist = camera.position.distanceTo(controls.target);
+  const escala = THREE.MathUtils.clamp(dist / 60, 0.3, 2.1);
+  let novos = 0;
+  pinos.forEach((g, i) => {
+    const { anel, nasce } = g.userData;
+    const k = THREE.MathUtils.clamp((t - nasce) / 520, 0, 1);
+    const pop = 1 + 2.7 * Math.pow(k - 1, 3) + 1.7 * Math.pow(k - 1, 2); // easeOutBack
+    g.visible = t >= nasce;
+    g.scale.setScalar(Math.max(0.001, escala * pop * (g === selecionado ? 1.5 : 1) * (g.userData.ponto.tipo === 'loja' ? 1.7 : 1)));
+    const f = calmo ? 0.5 : ((t / 1600 + i * 0.137) % 1);
+    anel.scale.setScalar(1 + f * 1.8 + (1 - k) * 3);
+    if (nasce && t >= nasce && !g.userData.contado) { g.userData.contado = true; if (g.userData.ponto.tipo !== 'loja') novos++; }
+  });
+
+  if (novos) contar(novos);
+  const w = renderer.domElement.clientWidth, h = renderer.domElement.clientHeight;
+  rotulos.forEach(({ el, pos }) => {
+    tmp.copy(pos).project(camera);
+    const longe = camera.position.distanceTo(pos);
+    const op = tmp.z < 1 ? THREE.MathUtils.clamp((260 - longe) / 80, 0, 1) : 0;
+    el.style.opacity = op;
+    if (op > 0) el.style.transform = `translate(${(tmp.x + 1) / 2 * w}px, ${(1 - tmp.y) / 2 * h}px) translate(-50%, -50%)`;
+  });
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(quadro);
+}
+
+montarFiltros();
+renderizar();
+if (innerWidth <= 640) { document.getElementById('painel').classList.add('recolhido'); document.getElementById('recolher').textContent = '▴'; }
+iniciarAbertura(0);
+requestAnimationFrame(quadro);
+</script>
