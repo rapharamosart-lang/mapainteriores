@@ -41,5 +41,5 @@ window.BartzCloud = (() => {
     await api('/storage/v1/object/bartz-renders',{method:'DELETE',headers:json,body:JSON.stringify({prefixes:[pathFor(id,'original'),pathFor(id,'result')]})});
     await api('/rest/v1/bartz_projects?id=eq.'+encodeURIComponent(id),{method:'DELETE'});
   }
-  return {login,logout,list,put,remove,get active(){return !!session;}};
+  return {login,logout,list,put,remove,get active(){return !!session;},get userId(){return session?.user?.id || null;}};
 })();

@@ -44,3 +44,7 @@ O editor agora prioriza uma área maior para a imagem no desktop. Direções cri
 ## Gestão de projetos
 
 Abra um projeto para editar cliente, telefone, endereço, responsável, tipo de imóvel, ambiente, prazo e situação. Marcar como concluído registra a data; reabrir limpa a conclusão, e concluir novamente registra uma nova data. O Dashboard mostra totais, atrasos e duração média decorrida, com ranking por quantidade concluída e desempate alfabético. Os dados locais persistem no IndexedDB. Na nuvem, aplique a migração 003; a visibilidade continua restrita ao proprietário. Login de produção, permissões compartilhadas da equipe e processamento OpenAI ainda exigem ativação/integração.
+
+## Projetistas
+
+O menu Projetistas permite cadastrar e editar nome, foto, função e descrição. Os perfis ficam no localStorage, separados por ID da conta ou modo local; não são sincronizados pelo Supabase e não criam contas de acesso. O dashboard lista também perfis sem entregas. Selecione o nome cadastrado no campo Projetista responsável para vincular o ID do perfil ao projeto. Fotos são limitadas a 5 MB e reduzidas no navegador. O perfil reúne os projetos acessíveis e links para seus detalhes.
