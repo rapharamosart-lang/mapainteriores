@@ -29,3 +29,7 @@ O domínio `moerbwpubdgjnenczgoq.supabase.co` foi proposto na configuração de 
 ## Direções criativas
 
 Após a migração inicial, aplique também `migrations/202611070002_project_prompt.sql` para guardar o prompt do projeto. Ela adiciona uma coluna opcional sem mudar as políticas de acesso. A API de imagens da OpenAI ainda não é chamada.
+
+## Cadastro e dashboard
+
+Aplique `migrations/202611070003_project_metadata.sql` depois das migrações anteriores para salvar cliente, telefone, endereço, projetista, ambiente, prazo e conclusão. O dashboard usa apenas projetos acessíveis à conta; as políticas existentes não fornecem um ranking global da equipe. A métrica é tempo decorrido entre criação e conclusão, não horas de trabalho. O Google Maps abre uma busca pelo endereço cadastrado e não requer chave. A migração ainda precisa ser aplicada e validada no Supabase real.

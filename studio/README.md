@@ -40,3 +40,7 @@ Grafite #2D2D2E, amarelo #F3BC2E, branco #FFFFFF; Poppins; linhas verticais com 
 ## Atualização Interiores Bart Studio
 
 O editor agora prioriza uma área maior para a imagem no desktop. Direções criativas incluem realismo fotográfico, textura localizada, substituição de objeto e iluminação natural, com instruções personalizadas, cópia e persistência do prompt no projeto. O modo nuvem exige a segunda migração SQL para persistir esse campo. Os presets preparam instruções; não processam imagens nem chamam a OpenAI. Links na barra lateral levam ao site público e ao mapa existente.
+
+## Gestão de projetos
+
+Abra um projeto para editar cliente, telefone, endereço, responsável, tipo de imóvel, ambiente, prazo e situação. Marcar como concluído registra a data; reabrir limpa a conclusão, e concluir novamente registra uma nova data. O Dashboard mostra totais, atrasos e duração média decorrida, com ranking por quantidade concluída e desempate alfabético. Os dados locais persistem no IndexedDB. Na nuvem, aplique a migração 003; a visibilidade continua restrita ao proprietário. Login de produção, permissões compartilhadas da equipe e processamento OpenAI ainda exigem ativação/integração.
