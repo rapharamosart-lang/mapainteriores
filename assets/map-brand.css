@@ -1,0 +1,11 @@
+@font-face{font-family:Poppins;src:url('fonts/poppins-light.ttf') format('truetype');font-weight:300;font-display:swap}
+@font-face{font-family:Poppins;src:url('fonts/poppins-regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Poppins;src:url('fonts/poppins-medium.ttf') format('truetype');font-weight:500 700;font-display:swap}
+html body,html button,html input,html select,html textarea,html h1,html h2,html h3{font-family:Poppins,Arial,sans-serif}
+.public-map #painel,.public-map #cartao,.public-map #visor,.public-map .maplibregl-ctrl-top-right{display:none!important}
+.public-map body{background:#2d2d2e}
+.public-map #abertura{position:fixed;left:7%;top:22%;transform:none;align-items:flex-start;max-width:380px;background:#2d2d2ef5;border:1px solid #ffffff20;box-shadow:none;border-radius:0;color:white;padding:28px;pointer-events:none}
+.public-map #abertura strong{font-family:Poppins,Arial,sans-serif;font-weight:300;color:#f3bc2e;font-size:clamp(65px,10vw,140px)}
+.public-map #abertura span{font-family:Poppins,Arial,sans-serif;color:white;font-size:15px;line-height:1.7}
+.public-map .maplibregl-ctrl-attrib{font-family:Poppins,Arial,sans-serif;font-size:9px}
+@media(max-width:640px){.public-map #abertura{top:5%;left:6%;padding:16px;max-width:250px}.public-map #abertura strong{font-size:72px}.public-map #abertura span{font-size:11px}}

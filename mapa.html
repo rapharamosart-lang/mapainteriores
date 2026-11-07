@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Interiores Móveis Planejados</title>
 <meta name="description" content="Mapa 3D de Maceió com os clientes da Interiores Móveis Planejados.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="assets/map-brand.css">
+<script>if(new URLSearchParams(location.search).get("publico")==="1")document.documentElement.classList.add("public-map");</script>
+<link rel="stylesheet" href="assets/vendor/maplibre-gl.css">
 <style>
   /* Layout: cena 3D ocupando a tela, painel flutuante à esquerda (folha inferior no celular). */
   :root {
@@ -23,8 +23,8 @@
     --erro: #b3261e;
     --rotulo: rgba(255, 255, 255, .92);
     --rotulo-texto: #2a3640;
-    --fonte-titulo: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-    --fonte: "Figtree", "Segoe UI", system-ui, sans-serif;
+    --fonte-titulo: Poppins, Arial, sans-serif;
+    --fonte: Poppins, Arial, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -266,11 +266,12 @@
   </div>
 </div>
 
-<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="assets/vendor/maplibre-gl.js"></script>
 <script src="dados.js"></script>
 <script>
 const VISAO_CIDADE = { center: [-35.722, -9.638], zoom: 13.1, pitch: 60, bearing: -24 };
 const VISAO_GERAL = { center: [-35.70, -9.58], zoom: 11.2, pitch: 35, bearing: -10 };
+const publico = document.documentElement.classList.contains('public-map');
 const calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- Estado ----------
@@ -278,10 +279,10 @@ const CHAVE = 'interiores-clientes-reais', CHAVE_SIM = 'interiores-mostrar-simul
 const ler = (k, padrao) => { try { const v = localStorage.getItem(k); return v === null ? padrao : JSON.parse(v); } catch { return padrao; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 // clientes cadastrados neste aparelho (migra os pontos da versão anterior)
-let reais = ler(CHAVE, null) ?? ler('mapa-maceio-pontos-extras', []);
+let reais = publico ? [] : (ler(CHAVE, null) ?? ler('mapa-maceio-pontos-extras', []));
 reais.forEach((p, i) => { p.id ??= Date.now() + i; });
 const salvarReais = () => gravar(CHAVE, reais);
-let mostrarSimulados = ler(CHAVE_SIM, true);
+let mostrarSimulados = publico ? !PONTOS.some(p => !p.simulado && p.tipo !== 'loja') : ler(CHAVE_SIM, true);
 const ativos = new Set(Object.keys(TIPOS));
 // ordem: showroom e clientes fixos, cadastrados aqui, depois os simulados
 const todos = () => [...PONTOS.filter(p => !p.simulado), ...reais.map(p => ({ ...p, local: true })),
@@ -295,6 +296,7 @@ let selecionado = null;
 // ---------- Mapa ----------
 const mapa = new maplibregl.Map({
   container: 'cena',
+  interactive: !publico,
   style: 'https://tiles.openfreemap.org/styles/liberty',
   ...VISAO_GERAL, pitch: 0, bearing: 0,
   maxPitch: 78, antialias: true, attributionControl: { compact: true }
@@ -380,11 +382,11 @@ mapa.on('load', () => {
     paint: { 'text-color': '#7a4520', 'text-halo-color': '#ffffff', 'text-halo-width': 2 }
   });
 
-  mapa.on('click', 'pinos', e => { if (!modoAdicionar) selecionar(pontos[e.features[0].properties.i]); });
+  mapa.on('click', 'pinos', e => { if (!publico && !modoAdicionar) selecionar(pontos[e.features[0].properties.i]); });
   mapa.on('mouseenter', 'pinos', () => { if (!modoAdicionar) mapa.getCanvas().style.cursor = 'pointer'; });
   mapa.on('mouseleave', 'pinos', () => { if (!modoAdicionar) mapa.getCanvas().style.cursor = ''; });
 
-  carregarDoSite().finally(() => { renderizar(); iniciarAbertura(); requestAnimationFrame(quadro); });
+  carregarDoSite().finally(() => { if (publico) { mostrarSimulados = !PONTOS.some(p => !p.simulado && p.tipo !== 'loja'); document.querySelector('#abertura span').textContent = mostrarSimulados ? 'pontos simulados em Maceió · Alagoas (demonstração)' : 'clientes em Maceió · Alagoas'; } renderizar(); iniciarAbertura(); requestAnimationFrame(quadro); if(publico) parent.postMessage({type:'interiores-map-ready'},location.origin); });
 });
 
 // ---------- Clientes e fotos fixos do site (clientes.csv e fotos.json no repositório) ----------
@@ -421,8 +423,9 @@ function iniciarAbertura() {
   caixaAbertura.classList.remove('saindo');
   const ordem = pontos.map((p, i) => [p, p.tipo === 'loja' ? -1 : ((i * 2654435761) % 1000) / 1000]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
   const duracao = calmo ? 0 : Math.min(7000, Math.max(2400, ordem.length * 220));
-  ordem.forEach((p, i) => { p.contado = false; p.nasce = relogio + 900 + (ordem.length > 1 ? duracao * Math.pow(i / (ordem.length - 1), 0.85) : 0); });
+  ordem.forEach((p, i) => { p.contado = false; p.nasce = relogio + (calmo ? 0 : 900) + (ordem.length > 1 ? duracao * Math.pow(i / (ordem.length - 1), 0.85) : 0); });
   if (!clientes()) { caixaAbertura.hidden = true; abertura = null; }
+  if (publico) caixaAbertura.setAttribute('aria-live','off');
   mapa.jumpTo({ ...VISAO_GERAL, pitch: 0, bearing: 0 });
   mapa.easeTo({ ...VISAO_CIDADE, duration: calmo ? 0 : duracao + 2200, delay: 300, essential: true });
 }
@@ -434,11 +437,12 @@ function contar(novos) {
   aNum.classList.remove('pulo'); void aNum.offsetWidth; aNum.classList.add('pulo');
   if (abertura.n >= clientes()) {
     abertura = null;
-    setTimeout(() => caixaAbertura.classList.add('saindo'), 1400);
-    setTimeout(() => { if (!abertura) caixaAbertura.hidden = true; }, 2000);
+    if (!publico) setTimeout(() => caixaAbertura.classList.add('saindo'), 1400);
+    setTimeout(() => { if (!abertura && !publico) caixaAbertura.hidden = true; }, 2000);
   }
 }
 document.getElementById('btnAbertura').onclick = iniciarAbertura;
+addEventListener('message', e => { if (publico && e.origin === location.origin && e.source === parent && e.data?.type === 'interiores-map-replay' && mapa.isStyleLoaded()) iniciarAbertura(); });
 mapa.getCanvas().addEventListener('pointerdown', () => { if (abertura) pontos.forEach(p => { if (!p.contado) p.nasce = relogio; }); });
 
 let animando = true;

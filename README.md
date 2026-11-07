@@ -69,3 +69,11 @@ O formulário prepara um resumo local para copiar: não envia contatos nem grava
 Substitua a ilustração conceitual por fotografias autorizadas e configure um contato real antes de usar o site como canal comercial.
 Login, dashboard e integrações OpenAI/Supabase ainda não foram implementados nesta página.
 A referência https://www.bartzmoveis.com.br/lojas foi informada pelo usuário, mas sua inspeção foi bloqueada pela política de rede durante esta implementação.
+
+## Abertura com mapa
+
+O primeiro bloco do site incorpora `mapa.html?publico=1`: exibe mapa e contador, sem os controles de cadastro. Esse modo não lê clientes privados do localStorage. Usa clientes publicados no repositório e, quando não há nenhum, identifica explicitamente os pontos simulados como demonstração. A contagem representa os registros localizáveis publicados, sem incluir showroom.
+
+`assets/public-map.js` fornece uma abertura esquemática local com o contorno de Maceió e os mesmos pontos se a cartografia externa não carregar. O mapa 3D substitui essa abertura somente após estar inicializado. O botão Rever abertura reinicia o efeito; movimento reduzido exibe o total sem animação. As fontes Poppins são locais também no mapa. Rótulos cartográficos do provedor conservam suas fontes próprias.
+
+MapLibre GL 4.7.1 está em `assets/vendor/`, com licenças, obtido do npm e verificado com a integridade SHA-512 do pacote. A cartografia continua dependendo de tiles.openfreemap.org e dos recursos indicados pelo estilo. Testes de integração verificaram o mapa incorporado com um estilo controlado; não estabelecem acesso ao provedor real no ambiente restrito.
