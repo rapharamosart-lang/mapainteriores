@@ -25,3 +25,7 @@ Projeto: `moerbwpubdgjnenczgoq`. A URL e a chave publishable foram configuradas 
 ## Ambiente de desenvolvimento na nuvem
 
 O domínio `moerbwpubdgjnenczgoq.supabase.co` foi proposto na configuração de rede. Revisar e salvar as configurações, depois publicar o ambiente para reutilização. O salvamento do rascunho não aplica automaticamente a permissão. Validar uma conexão nova após a aplicação.
+
+## Direções criativas
+
+Após a migração inicial, aplique também `migrations/202611070002_project_prompt.sql` para guardar o prompt do projeto. Ela adiciona uma coluna opcional sem mudar as políticas de acesso. A API de imagens da OpenAI ainda não é chamada.

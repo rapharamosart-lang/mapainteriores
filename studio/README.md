@@ -36,3 +36,7 @@ A URL do Supabase e a chave pública publishable estão configuradas em `cloud.j
 ## Identidade
 
 Grafite #2D2D2E, amarelo #F3BC2E, branco #FFFFFF; Poppins; linhas verticais com destaque amarelo. Manual fornecido pelo cliente. Os textos de segurança sobre revisão de detalhes são específicos do produto.
+
+## Atualização Interiores Bart Studio
+
+O editor agora prioriza uma área maior para a imagem no desktop. Direções criativas incluem realismo fotográfico, textura localizada, substituição de objeto e iluminação natural, com instruções personalizadas, cópia e persistência do prompt no projeto. O modo nuvem exige a segunda migração SQL para persistir esse campo. Os presets preparam instruções; não processam imagens nem chamam a OpenAI. Links na barra lateral levam ao site público e ao mapa existente.

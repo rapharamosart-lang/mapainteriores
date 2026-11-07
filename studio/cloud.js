@@ -27,14 +27,14 @@ window.BartzCloud = (() => {
   async function image(path) { return (await api('/storage/v1/object/authenticated/bartz-renders/'+path)).blob(); }
   async function list() {
     const rows = await (await api('/rest/v1/bartz_projects?select=*&order=created_at.desc')).json();
-    return Promise.all(rows.map(async r => ({id:r.id,name:r.name,mode:r.mode,createdAt:Date.parse(r.created_at),original:await image(r.original_path),result:r.result_path ? await image(r.result_path) : undefined})));
+    return Promise.all(rows.map(async r => ({id:r.id,name:r.name,mode:r.mode,createdAt:Date.parse(r.created_at),prompt:r.prompt || '',original:await image(r.original_path),result:r.result_path ? await image(r.result_path) : undefined})));
   }
   async function put(project) {
     const originalPath = pathFor(project.id,'original');
     const resultPath = project.result ? pathFor(project.id,'result') : null;
     await upload(originalPath,project.original);
     if (resultPath) await upload(resultPath,project.result);
-    await api('/rest/v1/bartz_projects?on_conflict=id',{method:'POST',headers:{...json,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:project.id,owner_id:session.user.id,name:project.name,mode:project.mode,created_at:new Date(project.createdAt).toISOString(),original_path:originalPath,result_path:resultPath})});
+    await api('/rest/v1/bartz_projects?on_conflict=id',{method:'POST',headers:{...json,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:project.id,owner_id:session.user.id,name:project.name,mode:project.mode,prompt:project.prompt || null,created_at:new Date(project.createdAt).toISOString(),original_path:originalPath,result_path:resultPath})});
   }
   async function remove(id) {
     // Remove objects first so a failed delete remains retryable from the project list.

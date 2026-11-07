@@ -2,7 +2,8 @@
 
 Duas versões:
 
-- `index.html` — **mapa real** (MapLibre + OpenStreetMap): ruas, bairros e prédios reais em 3D,
+- `index.html` — site institucional Interiores Bart Studio, com parallax, ambientes e resumo de briefing local.
+- `mapa.html` — **mapa real** (MapLibre + OpenStreetMap): ruas, bairros e prédios reais em 3D,
   botão de satélite. Feita para o GitHub Pages: precisa de Internet e abre por um endereço web.
 - `maquete.html` — maquete 3D estilizada (Three.js), tudo embutido; é a versão publicada como artefato no Claude.
 
@@ -11,7 +12,7 @@ As duas abrem com os pinos pipocando pela cidade e o contador subindo até o tot
 
 ## Site
 
-https://rapharamosart-lang.github.io/mapainteriores/ (mapa real) ·
+https://rapharamosart-lang.github.io/mapainteriores/ (site institucional) ·
 https://rapharamosart-lang.github.io/mapainteriores/maquete.html (maquete)
 
 Para ativar: **Settings → Pages → Deploy from a branch → `main` / (root)**.
@@ -56,3 +57,15 @@ O GitHub Pages precisa estar em **Settings → Pages → Source: GitHub Actions*
 
 Mapa e prédios: OpenFreeMap / © colaboradores do OpenStreetMap. Satélite: Esri World Imagery.
 Contorno do município: IBGE, via github.com/tbrugz/geodata-br.
+
+## Desenvolvimento do site institucional
+
+Execute `python3 -m http.server 8000 --bind 127.0.0.1` na raiz do repositório.
+A página inicial usa `assets/site.css`, `assets/site.js` e uma ilustração SVG local; não exige instalação nem build.
+O mapa anterior está preservado em `mapa.html`.
+
+O parallax respeita a preferência de movimento reduzido. As abas oferecem navegação por setas, Home e End.
+O formulário prepara um resumo local para copiar: não envia contatos nem grava dados no servidor.
+Substitua a ilustração conceitual por fotografias autorizadas e configure um contato real antes de usar o site como canal comercial.
+Login, dashboard e integrações OpenAI/Supabase ainda não foram implementados nesta página.
+A referência https://www.bartzmoveis.com.br/lojas foi informada pelo usuário, mas sua inspeção foi bloqueada pela política de rede durante esta implementação.
