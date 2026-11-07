@@ -48,3 +48,11 @@ Abra um projeto para editar cliente, telefone, endereço, responsável, tipo de 
 ## Projetistas
 
 O menu Projetistas permite cadastrar e editar nome, foto, função e descrição. Os perfis ficam no localStorage, separados por ID da conta ou modo local; não são sincronizados pelo Supabase e não criam contas de acesso. O dashboard lista também perfis sem entregas. Selecione o nome cadastrado no campo Projetista responsável para vincular o ID do perfil ao projeto. Fotos são limitadas a 5 MB e reduzidas no navegador. O perfil reúne os projetos acessíveis e links para seus detalhes.
+
+## Apresentação ao cliente
+
+Abra um projeto e clique em Gerar apresentação em PDF. O Studio reúne os projetos acessíveis com o mesmo nome de cliente (cadastre nomes distintos para clientes diferentes), utiliza resultado importado ou original e monta capa oficial, introdução, lista de ambientes e uma página por imagem. Confira a prévia e use Salvar apresentação em PDF: o navegador oferece a opção Salvar como PDF, A4 paisagem e sem cabeçalhos. Nada é enviado ao cliente automaticamente. `apresentacao.html` e `apresentacao-exemplo.pdf` demonstram o layout com cliente/projetista fictícios e imagens geradas por IA.
+
+## Continuidade
+
+Instagram: duas publicações selecionadas pelo usuário estão incorporadas no site, com links alternativos. Não existe sincronização automática de posts recentes. Banco, autenticação real e processamento OpenAI seguem pendentes de integração/validação conforme supabase/SETUP.md.
