@@ -11,8 +11,16 @@ window.BartzCloud = (() => {
     catch { throw new Error('Não foi possível conectar ao Supabase. Verifique sua conexão.'); }
     if (!response.ok) {
       if(path.startsWith('/functions/')){let info;try{info=await response.json();}catch{} throw new Error(info?.error||'Processamento indisponível. Verifique a ativação da função no Supabase.');}
+      let detail={};try{detail=await response.json();}catch{}
+      const code=detail.code||detail.error_code||'';
+      const message=String(detail.message||detail.error||'');
+      if(path.startsWith('/auth/'))throw new Error(code==='email_not_confirmed'?'Confirme o e-mail do usuário no Supabase.':'Não foi possível entrar. Confira e-mail, senha e confirmação do usuário no Supabase.');
       if (response.status === 401) throw new Error('Sua sessão expirou. Saia e entre novamente.');
-      if (response.status === 404 || response.status === 400) throw new Error('Verifique o login e se a configuração SQL do Studio foi aplicada no Supabase.');
+      if(code==='PGRST204'||code==='42703')throw new Error('Faltam colunas do Studio no banco. Aplique as migrações prompt e metadata no SQL Editor.');
+      if(code==='PGRST205'||code==='42P01')throw new Error('A tabela bartz_projects não foi encontrada. Aplique a configuração inicial do Studio no SQL Editor.');
+      if(path.startsWith('/storage/')&&/bucket.*not found/i.test(message))throw new Error('O bucket privado bartz-renders não foi criado. Aplique a configuração inicial do Studio.');
+      if(code==='42501'||response.status===403||/row.level security/i.test(message))throw new Error('Permissão recusada. Confira as políticas da tabela bartz_projects e do bucket bartz-renders.');
+      if (response.status === 404 || response.status === 400) throw new Error('Falha no '+(path.startsWith('/storage/')?'armazenamento':'banco')+' do Supabase (HTTP '+response.status+(code?', código '+code:'')+').');
       throw new Error('O Supabase não concluiu a operação ('+response.status+'). Verifique as permissões e a configuração.');
     }
     return response;
@@ -31,6 +39,8 @@ window.BartzCloud = (() => {
     return Promise.all(rows.map(async r => ({id:r.id,name:r.name,mode:r.mode,createdAt:Date.parse(r.created_at),prompt:r.prompt || '',metadata:r.metadata || {},original:await image(r.original_path),result:r.result_path ? await image(r.result_path) : undefined})));
   }
   async function put(project) {
+    // Check required schema before uploading, avoiding orphan files on missing migrations.
+    await api('/rest/v1/bartz_projects?select=id,prompt,metadata&limit=0');
     const originalPath = pathFor(project.id,'original');
     const resultPath = project.result ? pathFor(project.id,'result') : null;
     await upload(originalPath,project.original);
