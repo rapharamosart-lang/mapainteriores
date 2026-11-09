@@ -10,6 +10,7 @@ window.BartzCloud = (() => {
     try { response = await fetch(url+path, {...options, headers:{apikey:key,...(authenticated ? {Authorization:'Bearer '+session.access_token} : {}), ...options.headers}}); }
     catch { throw new Error('Não foi possível conectar ao Supabase. Verifique sua conexão.'); }
     if (!response.ok) {
+      if(path.startsWith('/functions/')){let info;try{info=await response.json();}catch{} throw new Error(info?.error||'Processamento indisponível. Verifique a ativação da função no Supabase.');}
       if (response.status === 401) throw new Error('Sua sessão expirou. Saia e entre novamente.');
       if (response.status === 404 || response.status === 400) throw new Error('Verifique o login e se a configuração SQL do Studio foi aplicada no Supabase.');
       throw new Error('O Supabase não concluiu a operação ('+response.status+'). Verifique as permissões e a configuração.');
@@ -41,5 +42,9 @@ window.BartzCloud = (() => {
     await api('/storage/v1/object/bartz-renders',{method:'DELETE',headers:json,body:JSON.stringify({prefixes:[pathFor(id,'original'),pathFor(id,'result')]})});
     await api('/rest/v1/bartz_projects?id=eq.'+encodeURIComponent(id),{method:'DELETE'});
   }
-  return {login,logout,list,put,remove,get active(){return !!session;},get userId(){return session?.user?.id || null;}};
+  async function generate(projectId) {
+    const response = await api('/functions/v1/enhance-image',{method:'POST',headers:json,body:JSON.stringify({projectId})});
+    return response.json();
+  }
+  return {login,logout,list,put,remove,generate,get active(){return !!session;},get userId(){return session?.user?.id || null;}};
 })();
