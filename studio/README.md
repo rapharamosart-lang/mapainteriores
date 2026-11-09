@@ -56,3 +56,7 @@ Abra um projeto e clique em Gerar apresentação em PDF. O Studio reúne os proj
 ## Continuidade
 
 Instagram: duas publicações selecionadas pelo usuário estão incorporadas no site, com links alternativos. Não existe sincronização automática de posts recentes. Banco, autenticação real e processamento OpenAI seguem pendentes de integração/validação conforme supabase/SETUP.md.
+
+## Editor da apresentação
+
+A aba Apresentação carrega projetos e permite montar até 20 páginas de imagens. Cada página tem ambiente, título e descrição (até 240 caracteres), substituição de PNG/JPG até 20 MB, remoção e ordenação com Subir/Descer. Salvar edição persiste um rascunho no IndexedDB separado por conta e projeto. Não sincroniza o rascunho com o Supabase. Os renders dos projetos não são modificados. Prévia / gerar PDF exporta o estado atual, inclusive alterações ainda não salvas; use Salvar edição para retomá-las depois. O editor trabalha nos dados da apresentação e gera um novo PDF, não importa PDFs externos para edição.
