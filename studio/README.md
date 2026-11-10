@@ -64,3 +64,9 @@ A aba Apresentação carrega projetos e permite montar até 20 páginas de image
 ## Orçamentos
 
 Menu Orçamentos, atalho no Dashboard e botão nos detalhes do projeto. Itens por ambiente com quantidade, valor unitário, desconto em reais, validade, situação e observações. Valores calculados em centavos e totais arredondados por item. Salva em `metadata.budget` do projeto: localmente no navegador ou no Supabase quando conectado, sob as políticas existentes. Não exige coluna nova além de metadata. O status Enviado é registro manual e não envia mensagem ao cliente. Aprovado também é marcação manual. Edição do cadastro do projeto preserva o orçamento. Testes locais cobrem cálculos, persistência, desconto inválido e mobile; sincronização real depende do Supabase configurado.
+
+## Dashboard e exemplo comercial
+
+O painel abre no Dashboard, inclusive após login. Resumo dos projetos, valores aprovados, situação dos orçamentos (rascunho, enviado, aprovado e não aprovado), progresso, prazos, projetos recentes e ranking compacto com nome, função e foto. As métricas utilizam somente projetos acessíveis da conta ou navegador; aprovação não indica receita recebida. O total comercial é recalculado pelos itens e desconto salvos.
+
+`orcamento-exemplo.html` e `orcamento-exemplo.pdf` apresentam um modelo com cliente, projetista, escopo e preços fictícios. O exemplo não grava dados nem participa das métricas. A validade da prévia HTML é ilustrativa, de 15 dias; o PDF é uma amostra fixa. Em um orçamento real, Visualizar / PDF abre os dados preenchidos em uma página com a identidade Interiores Bartz. Imprima em A4 sem cabeçalhos/rodapés do navegador. A prévia usa os campos atuais; salvar o orçamento é uma ação separada. Não envia propostas nem altera o status automaticamente.

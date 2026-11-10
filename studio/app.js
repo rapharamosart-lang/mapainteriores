@@ -25,7 +25,7 @@ $('download-original').onclick = () => download(current.original,'original'); $(
 $('delete').onclick = async () => { if (!confirm('Excluir este projeto e suas imagens'+(BartzCloud.active ? ' da nuvem?' : ' deste navegador?'))) return; try { await request('projects','delete',current.id); current = null; await projects(); notify('Projeto excluído.'); } catch { notify('Não foi possível excluir o projeto.'); } };
 function create() { revokeURLs(); if (selectedFile) $('preview').src = objectURL(selectedFile); show('create'); }
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => b.dataset.view === 'budget' ? openBudget().catch(e=>notify(e.message)) : b.dataset.view === 'presentation' ? openPresentationEditor().catch(e=>notify(e.message)) : b.dataset.view === 'team' ? team().catch(e=>notify(e.message)) : b.dataset.view === 'dashboard' ? dashboard().catch(() => notify('Não foi possível carregar as métricas.')) : b.dataset.view === 'projects' ? projects().catch(() => notify('Não foi possível carregar os projetos.')) : create()); $('new-project').onclick = create; $('back').onclick = () => projects();
-const opening = indexedDB.open('bartz-studio',1); opening.onupgradeneeded = () => opening.result.createObjectStore('projects',{keyPath:'id'}); opening.onsuccess = async () => { db = opening.result; storageReady(); if (selectedFile) $('save').disabled = false; await refresh(); }; opening.onerror = () => { storageReady(); notify('Armazenamento local indisponível. Habilite o armazenamento do navegador para salvar projetos.'); };
+const opening = indexedDB.open('bartz-studio',1); opening.onupgradeneeded = () => opening.result.createObjectStore('projects',{keyPath:'id'}); opening.onsuccess = async () => { db = opening.result; storageReady(); if (selectedFile) $('save').disabled = false; }; opening.onerror = () => { storageReady(); notify('Armazenamento local indisponível. Habilite o armazenamento do navegador para salvar projetos.'); };
 window.addEventListener('beforeunload',revokeURLs);
 
 function resetWorkspace() {
@@ -39,12 +39,12 @@ function resetWorkspace() {
   $('storage-badge').textContent = cloud ? 'Supabase · conectado' : 'Versão local';
   $('account').textContent = cloud ? 'Sair da nuvem' : 'Entrar na nuvem';
   $('storage-description').textContent = cloud ? 'Projetos privados da sua conta no Supabase.' : 'Salvos apenas neste navegador. Baixe os arquivos para manter uma cópia.';
-  show('create');
+  show('dashboard');
 }
 $('account').onclick = async () => {
   if (!BartzCloud.active) { $('login-error').textContent = ''; $('login-dialog').showModal(); return; }
   try { await BartzCloud.logout(); } catch { notify('Sessão local encerrada; não foi possível confirmar a saída no servidor.'); }
-  resetWorkspace(); await refresh();
+  resetWorkspace(); await dashboard();
 };
 $('login-cancel').onclick = () => { $('password').value = ''; $('login-dialog').close(); };
 $('login-form').onsubmit = async e => {
@@ -53,7 +53,7 @@ $('login-form').onsubmit = async e => {
     await BartzCloud.login($('email').value.trim(), $('password').value);
     // Verify table and bucket access before announcing that the cloud is ready.
     await BartzCloud.list();
-    resetWorkspace(); $('login-dialog').close(); await projects(); notify('Conectado. Seus projetos locais continuam separados.');
+    resetWorkspace(); $('login-dialog').close(); await dashboard(); notify('Conectado. Seus projetos locais continuam separados.');
   } catch (error) {
     if (BartzCloud.active) { try { await BartzCloud.logout(); } catch {} }
     $('login-error').textContent = error.message;
@@ -70,3 +70,5 @@ function buildPrompt(){return promptPresets[$('prompt-preset').value] + ($('prom
 function updatePrompt(){$('prompt-preview').value=buildPrompt();}
 $('prompt-preset').onchange=updatePrompt;$('prompt-details').oninput=updatePrompt;updatePrompt();
 $('copy-prompt').onclick=async()=>{try{await navigator.clipboard.writeText(buildPrompt());notify('Prompt copiado.');}catch{$('prompt-preview').focus();$('prompt-preview').select();notify('Selecione e copie o prompt acima.');}};
+
+addEventListener('DOMContentLoaded',()=>dashboard().catch(error=>notify(error.message||'Não foi possível abrir o dashboard.')));
