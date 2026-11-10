@@ -60,3 +60,7 @@ Instagram: duas publicações selecionadas pelo usuário estão incorporadas no 
 ## Editor da apresentação
 
 A aba Apresentação carrega projetos e permite montar até 20 páginas de imagens. Cada página tem ambiente, título e descrição (até 240 caracteres), substituição de PNG/JPG até 20 MB, remoção e ordenação com Subir/Descer. Salvar edição persiste um rascunho no IndexedDB separado por conta e projeto. Não sincroniza o rascunho com o Supabase. Os renders dos projetos não são modificados. Prévia / gerar PDF exporta o estado atual, inclusive alterações ainda não salvas; use Salvar edição para retomá-las depois. O editor trabalha nos dados da apresentação e gera um novo PDF, não importa PDFs externos para edição.
+
+## Orçamentos
+
+Menu Orçamentos, atalho no Dashboard e botão nos detalhes do projeto. Itens por ambiente com quantidade, valor unitário, desconto em reais, validade, situação e observações. Valores calculados em centavos e totais arredondados por item. Salva em `metadata.budget` do projeto: localmente no navegador ou no Supabase quando conectado, sob as políticas existentes. Não exige coluna nova além de metadata. O status Enviado é registro manual e não envia mensagem ao cliente. Aprovado também é marcação manual. Edição do cadastro do projeto preserva o orçamento. Testes locais cobrem cálculos, persistência, desconto inválido e mobile; sincronização real depende do Supabase configurado.
