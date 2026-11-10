@@ -1,6 +1,30 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#2D2D2E"><meta name="description" content="Interiores Bartz. Móveis planejados e interiores pensados para o seu jeito de viver, em Alagoas."><title>Interiores Bartz — Espaços para viver</title><link rel="preload" href="assets/fonts/poppins-light.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/brand.css?v=bartz-marcas-lado-a-lado-2"><script src="dados.js" defer></script><script src="assets/public-map.js" defer></script><script src="assets/site.js" defer></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#2D2D2E"><meta name="description" content="Interiores Bartz. Móveis planejados e interiores pensados para o seu jeito de viver, em Alagoas."><title>Interiores Bartz — Espaços para viver</title><link rel="preload" href="assets/fonts/poppins-light.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/brand.css?v=bartz-marcas-lado-a-lado-2"><script src="dados.js" defer></script><script src="assets/public-map.js" defer></script><script src="assets/site.js" defer></script><style id="brand-pair-layout">
+/* Original companion mark, paired with the main brand in the header. */
+.header-brands{display:flex;flex-flow:row nowrap;align-items:center;gap:24px;flex-shrink:0}
+.header-brands .companion-logo{display:block;width:88px;height:auto;flex-shrink:0}
+@media(max-width:1280px){
+  .header-brands{gap:16px}
+  .header .header-brands .brand,.header .header-brands .brand img{width:200px}
+  .header-brands .companion-logo{width:72px}
+  .menu-toggle{display:flex;align-items:center;gap:12px;border:0;background:none;color:inherit;padding:12px 0;font-size:17px}
+  .header nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--ink);padding:20px 6% 30px;flex-direction:column;align-items:stretch;gap:0;box-shadow:0 12px 20px #0001}
+  .header nav.open{display:flex}
+  .header nav a{padding:17px 0;font-size:17px;border-bottom:1px solid #ffffff30}
+  .header nav .nav-cta{padding:16px;margin-left:0}
+}
+@media(max-width:700px){
+  .header-brands{gap:12px}
+  .header .header-brands .brand,.header .header-brands .brand img{width:165px}
+  .header-brands .companion-logo{width:60px}
+}
+@media(max-width:380px){
+  .header-brands{gap:10px}
+  .header .header-brands .brand,.header .header-brands .brand img{width:140px}
+  .header-brands .companion-logo{width:50px}
+}
+</style></head>
 <body>
 <a class="skip" href="#conteudo">Ir para o conteúdo</a>
 <header class="header"><div class="header-brands"><a class="brand" href="#inicio" aria-label="Interiores Bartz início"><img src="assets/brand/logo-horizontal.svg" alt="Interiores — Móveis Planejados · Bartz" width="234" height="75"></a><img class="companion-logo" src="assets/brand/logo-complementar.png" alt="Bartz — 30 anos" width="122" height="79"></div><button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu <span>＋</span></button><nav id="navigation" aria-label="Navegação principal"><a href="#essencia">Nossa essência</a><a href="#ambientes">Ambientes</a><a href="#processo">Como criamos</a><a href="studio/">Acessar Studio</a><a class="nav-cta" href="#contato">Vamos conversar <span>↗</span></a></nav></header>
