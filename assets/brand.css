@@ -29,3 +29,27 @@ body{font-size:18px}.header nav{font-size:16px}.header nav{gap:22px}.header{padd
 .kinetic-band{height:220px;display:flex;gap:16px;justify-content:center;align-items:center;overflow:hidden;background:#2d2d2e;pointer-events:none;contain:layout paint}.kinetic-band i{display:block;flex:0 0 4px;background:#505051;will-change:transform}.kinetic-band i:nth-child(8n){background:#f3bc2e}.environments+.kinetic-band{background:#fff}.environments+.kinetic-band i{background:#ddd}.environments+.kinetic-band i:nth-child(8n){background:#f3bc2e}@media(max-width:700px){.kinetic-band{height:150px;gap:8px}.kinetic-band i{flex-basis:2px;max-height:90px}}@media(prefers-reduced-motion:reduce){.kinetic-band i{transform:none!important;will-change:auto}}
 .kinetic-band{height:320px;align-items:flex-start;padding-top:115px}.kinetic-band i{height:100px;max-height:none}@media(max-width:700px){.kinetic-band{height:280px;padding-top:90px}.kinetic-band i{height:80px!important}}
 .craft{display:grid;grid-template-columns:1fr 1.2fr;gap:55px;align-items:center}.craft img{width:100%;display:block}.craft p{font-size:19px;line-height:1.8}.craft small{font-size:14px}.instagram-section{background:#fff;color:#2d2d2e}.instagram-section h2 em{color:#2d2d2e}.instagram-section>p{line-height:1.8}.instagram-posts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;margin-top:35px;max-width:1100px}.instagram-posts iframe{width:100%;height:650px;border:1px solid #ddd;background:#f5f5f5}.instagram-posts article>a{display:block;padding:15px 0;font-size:16px;text-decoration:underline}@media(max-width:700px){.craft,.instagram-posts{grid-template-columns:1fr}.craft{gap:25px}.instagram-posts iframe{height:580px}}
+
+/* Original companion mark, paired with the main brand in the header. */
+.header-brands{display:flex;align-items:center;gap:24px;flex-shrink:0}
+.header-brands .companion-logo{display:block;width:88px;height:auto;flex-shrink:0}
+@media(max-width:1280px){
+  .header-brands{gap:16px}
+  .header .header-brands .brand,.header .header-brands .brand img{width:200px}
+  .header-brands .companion-logo{width:72px}
+  .menu-toggle{display:flex;align-items:center;gap:12px;border:0;background:none;color:inherit;padding:12px 0;font-size:17px}
+  .header nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--ink);padding:20px 6% 30px;flex-direction:column;align-items:stretch;gap:0;box-shadow:0 12px 20px #0001}
+  .header nav.open{display:flex}
+  .header nav a{padding:17px 0;font-size:17px;border-bottom:1px solid #ffffff30}
+  .header nav .nav-cta{padding:16px;margin-left:0}
+}
+@media(max-width:700px){
+  .header-brands{gap:12px}
+  .header .header-brands .brand,.header .header-brands .brand img{width:165px}
+  .header-brands .companion-logo{width:60px}
+}
+@media(max-width:380px){
+  .header-brands{gap:10px}
+  .header .header-brands .brand,.header .header-brands .brand img{width:140px}
+  .header-brands .companion-logo{width:50px}
+}
