@@ -14,20 +14,21 @@ function dashboardRanking(){
   const row=dashboardElement('div','','dashboard-person');row.append(dashboardElement('span',String(index+1).padStart(2,'0'),'rank-position'));
   const avatar=dashboardElement('span',person.name.slice(0,1).toUpperCase(),'dashboard-avatar');if(person.photo?.startsWith('data:image/')){avatar.textContent='';const img=document.createElement('img');img.src=person.photo;img.alt='Foto de '+person.name;avatar.append(img);}row.append(avatar);
   const identity=dashboardElement('div','','rank-identity');identity.append(dashboardElement('strong',person.name),dashboardElement('small',person.role||'Projetista'));row.append(identity);
-  const stats=dashboardElement('div','','rank-stats');stats.append(dashboardElement('strong',done+(done===1?' concluído':' concluídos')),dashboardElement('small',jobs.length+' projetos'));row.append(stats);$('ranking').append(row);
+  const stats=dashboardElement('div','','rank-stats');stats.append(dashboardElement('strong',done+(done===1?' concluído':' concluídos')),dashboardElement('small',(jobs.length-done)+' em andamento · '+jobs.length+' no total'));row.append(stats);$('ranking').append(row);
  }
 }
 function recentDashboardProjects(){
- const area=$('dashboard-recent');area.replaceChildren();if(!records.length){area.append(dashboardElement('p','Seu primeiro projeto começa aqui. Use “Novo projeto” para cadastrar uma imagem e os dados do cliente.','dashboard-empty'));return;}
+ const area=$('dashboard-recent');area.replaceChildren();const filtered=dashboardFilteredProjects();$('dashboard-result-count').textContent=filtered.length+' resultados · exibindo '+Math.min(filtered.length,10)+' projetos';if(!records.length){area.append(dashboardElement('p','Seu primeiro projeto começa aqui. Use “Novo projeto” para cadastrar uma imagem e os dados do cliente.','dashboard-empty'));return;}
+ if(!filtered.length){area.append(dashboardElement('p','Nenhum projeto encontrado para esta busca.','dashboard-empty'));return;}
  const wrap=dashboardElement('div','','dashboard-table-wrap');wrap.tabIndex=0;wrap.setAttribute('role','region');wrap.setAttribute('aria-label','Projetos recentes');const table=document.createElement('table');table.className='dashboard-table';const head=document.createElement('thead');const hr=document.createElement('tr');for(const title of ['Projeto / cliente','Projetista','Situação','Orçamento','Prazo']){const th=dashboardElement('th',title);th.scope='col';hr.append(th);}head.append(hr);table.append(head);const body=document.createElement('tbody');
- for(const project of records.slice(0,6)){
+ for(const project of filtered.slice(0,10)){
   const m=project.metadata||{},row=document.createElement('tr');const cell=document.createElement('td');const link=dashboardElement('button',project.name,'text-button');link.onclick=()=>detail(project);cell.append(link,dashboardElement('small',m.client||'Cliente não informado'));row.append(cell,dashboardElement('td',m.designer||'Sem responsável'));
   const stage=document.createElement('td');stage.append(dashboardElement('span',({progress:'Em andamento',review:'Em revisão',completed:'Concluído'})[m.stage]||'Em andamento','stage-pill '+(m.stage==='completed'?'is-complete':'')));row.append(stage);
   const quote=document.createElement('td');if(m.budget){const button=dashboardElement('button',money.format(budgetAmount(project)/100),'text-button');button.onclick=()=>openBudget(project.id).catch(e=>notify(e.message));quote.append(button);}else quote.textContent='Não cadastrado';row.append(quote,dashboardElement('td',m.deadline?m.deadline.split('-').reverse().join('/'):'Sem prazo'));body.append(row);
  }table.append(body);wrap.append(table);area.append(wrap);
 }
 async function dashboard(){
- show('dashboard');for(const id of ['metrics','ranking','budget-pipeline','project-progress','dashboard-recent'])$(id).replaceChildren();$('dashboard-feedback').textContent='Carregando visão geral…';
+ show('dashboard');for(const id of ['metrics','ranking','budget-pipeline','project-progress','dashboard-recent','dashboard-commercial','dashboard-attention','dashboard-trend'])$(id).replaceChildren();$('dashboard-feedback').textContent='Carregando visão geral…';
  const scope=BartzCloud.userId;
  try{await refresh();}catch(error){$('dashboard-feedback').textContent=error.message||'Não foi possível carregar os projetos. Tente novamente.';return;}
  if($('dashboard-view').hidden||scope!==BartzCloud.userId)return;revokeURLs();$('dashboard-feedback').textContent='';
@@ -38,6 +39,6 @@ async function dashboard(){
  for(const [key,label] of [['draft','Rascunhos'],['sent','Enviados'],['approved','Aprovados'],['declined','Não aprovados']]){const jobs=records.filter(p=>p.metadata?.budget&&(p.metadata.budget.stage||'draft')===key);const card=dashboardElement('div','','pipeline-item');card.append(dashboardElement('span',label),dashboardElement('strong',money.format(jobs.reduce((sum,p)=>sum+budgetAmount(p),0)/100)),dashboardElement('small',jobs.length+' orçamento'+(jobs.length===1?'':'s')));$('budget-pipeline').append(card);}
  const ratio=records.length?Math.round(complete.length/records.length*100):0;const progress=dashboardElement('div','','completion-summary');progress.append(dashboardElement('strong',ratio+'%'),dashboardElement('span','dos projetos concluídos'));const bar=document.createElement('progress');bar.max=records.length||1;bar.value=complete.length;bar.setAttribute('aria-label','Projetos concluídos');progress.append(bar);$('project-progress').append(progress);
  for(const [label,value] of [['Prazos vencidos',overdue.length],['Tempo médio decorrido',timed.length?(timed.reduce((sum,p)=>sum+Number(elapsed(p)),0)/timed.length).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' dias':'Sem conclusões registradas']]){const row=dashboardElement('p','','progress-stat');row.append(dashboardElement('span',label),dashboardElement('strong',value));$('project-progress').append(row);}
- recentDashboardProjects();dashboardRanking();
+ recentDashboardProjects();dashboardRanking();renderDashboardInsights();
 }
 $('dashboard-new').onclick=create;$('dashboard-projects').onclick=()=>projects().catch(e=>notify(e.message));
