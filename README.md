@@ -72,6 +72,16 @@ A referência https://www.bartzmoveis.com.br/lojas foi informada pelo usuário, 
 
 ## Abertura com mapa
 
+Antes do mapa, a página inicial apresenta a marca Interiores Bartz e um troféu
+3D de faces douradas com a frase “Interiores Bartz — Maceió. Sempre no topo do
+ranking nacional de vendas.” A abertura dura 3,4 segundos mais a transição,
+aparece uma vez por sessão da aba e pode ser pulada pelo botão ou pela tecla Esc.
+Links diretos para seções não exibem a abertura. A preferência por movimento
+reduzido mantém o troféu estático. Sem JavaScript, o site permanece acessível.
+O modelo é desenhado localmente em Canvas 2D a partir de uma malha 3D procedural,
+sem bibliotecas, downloads de modelos ou WebGL. Arquivos: `assets/award-intro.js`
+e `assets/award-intro.css`. Ao sair, a animação do mapa é reiniciada.
+
 O primeiro bloco do site incorpora `mapa.html?publico=1`: exibe mapa e contador, sem os controles de cadastro. Esse modo não lê clientes privados do localStorage. Usa clientes publicados no repositório e, quando não há nenhum, identifica explicitamente os pontos simulados como demonstração. A contagem representa os registros localizáveis publicados, sem incluir showroom.
 
 `assets/public-map.js` fornece uma abertura esquemática local com o contorno de Maceió e os mesmos pontos se a cartografia externa não carregar. O mapa 3D substitui essa abertura somente após estar inicializado. O botão Rever abertura reinicia o efeito; movimento reduzido exibe o total sem animação. As fontes Poppins são locais também no mapa. Rótulos cartográficos do provedor conservam suas fontes próprias.
