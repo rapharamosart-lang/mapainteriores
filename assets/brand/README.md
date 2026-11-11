@@ -10,3 +10,5 @@ Fonte: BRAND_BOOK_INTERIORES_BARTZ (1).pdf, versão 1.0, outubro de 2026, fornec
 - A ilustração de interiores representa materiais, não amplia a paleta institucional.
 
 O PDF é referência de identidade; contatos e textos de exemplo do manual não foram publicados como dados reais da empresa.
+
+- `logo-horizontal-positivo.svg`: versão positiva original do mesmo brand book, extraída em vetores grafite, com fundo transparente, para a abertura clara.

@@ -24,20 +24,44 @@
   .header .header-brands .brand,.header .header-brands .brand img{width:140px}
   .header-brands .companion-logo{width:50px}
 }
-</style><link rel="stylesheet" href="assets/award-intro.css?v=1"></head>
+</style><link rel="stylesheet" href="assets/award-intro.css?v=2"></head>
 <body>
-<section id="award-intro" class="award-intro" role="dialog" aria-modal="true" aria-labelledby="award-title" aria-describedby="award-location" hidden>
-  <button class="award-intro__skip" type="button">Pular abertura <span aria-hidden="true">↗</span></button>
+<section id="award-intro" class="award-intro" role="dialog" aria-modal="true" aria-labelledby="award-title" aria-describedby="award-location award-subtitle" hidden>
+  <div class="award-intro__top"><img class="award-intro__brand" src="assets/brand/logo-horizontal-positivo.svg" alt="Interiores Bartz" width="220" height="71" fetchpriority="high"><button class="award-intro__skip" type="button">Entrar no site <span aria-hidden="true">↗</span></button></div>
   <div class="award-intro__content">
-    <img class="award-intro__brand" src="assets/brand/logo-horizontal.svg" alt="Interiores Bartz" width="220" height="71" fetchpriority="high">
-    <div class="award-intro__stage" aria-hidden="true"><span class="award-intro__fallback">🏆</span><canvas></canvas></div>
-    <p class="award-intro__location" id="award-location">Interiores Bartz — Maceió</p>
-    <h2 class="award-intro__headline" id="award-title">Sempre no topo do<br><strong>ranking nacional de vendas.</strong></h2>
-    <div class="award-intro__rule" aria-hidden="true"></div>
+    <div class="award-intro__copy"><p class="award-intro__location" id="award-location"><span></span> Interiores Bartz — Maceió</p>
+      <h2 class="award-intro__headline" id="award-title">Sempre <br>no <strong>topo<span aria-hidden="true">.</span></strong></h2>
+      <p class="award-intro__subtitle" id="award-subtitle">do ranking nacional de vendas.</p>
+      <div class="award-intro__rule" aria-hidden="true"><i></i></div>
+    </div>
+    <button class="award-intro__stage" type="button" aria-label="Repetir animação do pódio">
+      <svg viewBox="0 0 500 400" aria-hidden="true" focusable="false">
+        <circle class="award-orbit" cx="270" cy="196" r="164" fill="#f2efdF"/>
+        <path class="award-guide" d="M46 352H464M46 270H464M46 188H464" fill="none" stroke="#2d2d2e" stroke-opacity=".09" stroke-dasharray="3 9"/>
+        <g class="award-bars">
+          <g class="award-bar award-bar--one"><rect x="76" y="267" width="99" height="85" rx="5" fill="#e2dfd3"/><path d="M98 290h18m-9-9v18" stroke="#77756d" stroke-width="2"/></g>
+          <g class="award-bar award-bar--two"><rect x="187" y="207" width="99" height="145" rx="5" fill="#f6d77c"/><path d="m210 234 7-7 7 7m-7-7v22" stroke="#7d621c" stroke-width="2" fill="none"/></g>
+          <g class="award-bar award-bar--three"><rect x="298" y="143" width="114" height="209" rx="5" fill="#f3bc2e"/><path d="m343 188 12-12 12 12m-12-12v34" stroke="#2d2d2e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+        </g>
+        <path class="award-climb" d="M62 246 151 201 233 165 306 116" fill="none" stroke="#2d2d2e" stroke-width="3" stroke-linecap="round"/>
+        <path class="award-arrow" d="m287 116 19 0-5 19" fill="none" stroke="#2d2d2e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <g class="award-cup" fill="none" stroke="#2d2d2e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M334 61h42v18c0 17-9 26-21 26s-21-9-21-26Z" fill="#f3bc2e"/>
+          <path d="M334 67h-12v9c0 11 5 16 15 16m39-25h12v9c0 11-5 16-15 16m-18 13v15m-12 0h24"/>
+        </g>
+        <g class="award-sparks" fill="none" stroke="#2d2d2e" stroke-width="2" stroke-linecap="round">
+          <path d="M355 33v-10m42 26 8-8m-93 8-8-8"/>
+          <path d="M435 114v12m-6-6h12M118 138v12m-6-6h12"/>
+          <circle cx="264" cy="76" r="4"/><circle cx="444" cy="282" r="4"/>
+        </g>
+        <path d="M58 353H441" stroke="#2d2d2e" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="award-intro__hint">Toque para celebrar <span aria-hidden="true">↗</span></span>
+    </button>
   </div>
-  <span class="award-intro__signature" aria-hidden="true">Móveis planejados · Alagoas</span>
+  <div class="award-intro__bottom"><span>Feito para ir além.</span><span>Móveis planejados · Alagoas</span></div>
 </section>
-<script src="assets/award-intro.js?v=1"></script>
+<script src="assets/award-intro.js?v=2"></script>
 <a class="skip" href="#conteudo">Ir para o conteúdo</a>
 <header class="header"><div class="header-brands"><a class="brand" href="#inicio" aria-label="Interiores Bartz início"><img src="assets/brand/logo-horizontal.svg" alt="Interiores — Móveis Planejados · Bartz" width="234" height="75"></a><img class="companion-logo" src="assets/brand/logo-complementar.png" alt="Bartz — 30 anos" width="122" height="79"></div><button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu <span>＋</span></button><nav id="navigation" aria-label="Navegação principal"><a href="#essencia">Nossa essência</a><a href="#ambientes">Ambientes</a><a href="#processo">Como criamos</a><a href="studio/">Acessar Studio</a><a class="nav-cta" href="#contato">Vamos conversar <span>↗</span></a></nav></header>
 <main id="conteudo">

@@ -72,15 +72,18 @@ A referência https://www.bartzmoveis.com.br/lojas foi informada pelo usuário, 
 
 ## Abertura com mapa
 
-Antes do mapa, a página inicial apresenta a marca Interiores Bartz e um troféu
-3D de faces douradas com a frase “Interiores Bartz — Maceió. Sempre no topo do
-ranking nacional de vendas.” A abertura dura 3,4 segundos mais a transição,
-aparece uma vez por sessão da aba e pode ser pulada pelo botão ou pela tecla Esc.
-Links diretos para seções não exibem a abertura. A preferência por movimento
-reduzido mantém o troféu estático. Sem JavaScript, o site permanece acessível.
-O modelo é desenhado localmente em Canvas 2D a partir de uma malha 3D procedural,
-sem bibliotecas, downloads de modelos ou WebGL. Arquivos: `assets/award-intro.js`
-e `assets/award-intro.css`. Ao sair, a animação do mapa é reiniciada.
+Antes do mapa, a página inicial apresenta uma abertura 2D sobre fundo claro.
+A marca positiva original do brand book aparece sem retângulo de fundo;
+barras de um pódio crescem em sequência, uma seta sobe e um pequeno troféu
+vetorial entra no alto. A frase é “Interiores Bartz — Maceió. Sempre no topo
+do ranking nacional de vendas.” O gráfico é ilustrativo, sem métricas ou posições.
+A abertura dura 5,2 segundos mais a transição e aparece uma vez por sessão
+da aba. “Entrar no site” ou Esc encerram imediatamente; tocar no gráfico
+repete a animação e reinicia o prazo. Tab alterna entre os dois controles.
+Links para seções pulam a abertura. Movimento reduzido mantém o desenho
+estático e sem interação de movimento. Sem JavaScript, o site abre normalmente.
+Arquivos: `assets/award-intro.js` e `assets/award-intro.css`; sem Canvas,
+WebGL ou dependências externas. Ao sair, a animação do mapa é reiniciada.
 
 O primeiro bloco do site incorpora `mapa.html?publico=1`: exibe mapa e contador, sem os controles de cadastro. Esse modo não lê clientes privados do localStorage. Usa clientes publicados no repositório e, quando não há nenhum, identifica explicitamente os pontos simulados como demonstração. A contagem representa os registros localizáveis publicados, sem incluir showroom.
 
