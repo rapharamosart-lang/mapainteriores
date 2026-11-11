@@ -1,0 +1,11 @@
+create role anon; create role authenticated;
+create schema auth; grant usage on schema auth to authenticated,anon;
+create table auth.users(id uuid primary key,email text);
+create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;
+create table public.bartz_projects(id uuid primary key,owner_id uuid references auth.users(id));
+alter table public.bartz_projects enable row level security;
+grant select on public.bartz_projects to authenticated;
+create policy owner_only on public.bartz_projects for select to authenticated using(owner_id=auth.uid());
+insert into auth.users values('00000000-0000-4000-8000-000000000001','owner@example.invalid'),('00000000-0000-4000-8000-000000000002','designer@example.invalid'),('00000000-0000-4000-8000-000000000003','installer@example.invalid'),('00000000-0000-4000-8000-000000000004','outsider@example.invalid');
+insert into public.bartz_projects values('10000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000001');

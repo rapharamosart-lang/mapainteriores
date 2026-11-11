@@ -56,5 +56,11 @@ window.BartzCloud = (() => {
     const response = await api('/functions/v1/enhance-image',{method:'POST',headers:json,body:JSON.stringify({projectId})});
     return response.json();
   }
-  return {login,logout,list,put,remove,generate,get active(){return !!session;},get userId(){return session?.user?.id || null;}};
+  async function installation(table,method='GET',data=null,id=null){
+    const allowed=['jobs','parts','issues','notifications'];if(!allowed.includes(table))throw new Error('Recurso inválido.');
+    const path='/rest/v1/bartz_installation_'+table+(id?'?id=eq.'+encodeURIComponent(id):'?select=*');
+    try{const response=await api(path,{method,headers:{...json,Prefer:'return=representation'},...(data?{body:JSON.stringify(data)}:{})});return response.json();}
+    catch(error){if(/tabela|configuração inicial|Faltam colunas|código PGRST/.test(error.message))throw new Error('Montagem compartilhada ainda não foi ativada. O administrador precisa aplicar a migração de montagem no Supabase.');throw error;}
+  }
+  return {login,logout,list,put,remove,generate,installation,get email(){return session?.user?.email||"";},get active(){return !!session;},get userId(){return session?.user?.id || null;}};
 })();
